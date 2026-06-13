@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Memory Capsule",
+  "version": "1.0",
+
+  "permissions": ["storage", "activeTab"],
+
+  "host_permissions": [
+    "https://chatgpt.com/*"
+  ],
+
+  "content_scripts": [
+    {
+      "matches": ["https://chatgpt.com/*"],
+      "js": ["content.js"]
+    }
+  ],
+
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
