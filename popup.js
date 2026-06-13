@@ -1,17 +1,18 @@
-document.getElementById("exportBtn")
+document
+  .getElementById("exportBtn")
   .addEventListener("click", () => {
 
     chrome.storage.local.get(
-      ["memoryCapsule"],
+      ["capsules"],
       (result) => {
 
-        const messages =
-          result.memoryCapsule || [];
+        const capsules =
+          result.capsules || {};
 
         const blob = new Blob(
           [
             JSON.stringify(
-              messages,
+              capsules,
               null,
               2
             )
@@ -36,7 +37,13 @@ document.getElementById("exportBtn")
         a.click();
 
         URL.revokeObjectURL(url);
+
+        console.log(
+          "Exported",
+          Object.keys(capsules).length,
+          "capsules"
+        );
       }
     );
 
-});
+  });
