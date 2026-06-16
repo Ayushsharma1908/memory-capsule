@@ -1,7 +1,6 @@
 console.log("🚀 Memory Capsule Recorder Started");
 
-let lastCount = 0;
-let seenCountPerConversation = {};
+let lastSnapshot = 0;
 let activeConversationId = null;
 
 function getConversationId() {
@@ -41,40 +40,26 @@ function saveMessages() {
   chrome.storage.local.get(["capsules"], (result) => {
     const capsules = result.capsules || {};
 
+    const messages = [...messageNodes].map((el) => ({
+      role: el.getAttribute("data-message-author-role"),
+      content: el.innerText,
+      timestamp: Date.now(),
+    }));
+
     const existing = capsules[conversationId];
-
-    const existingMessages = existing?.messages || [];
-
-    // Track how many messages we already saved for THIS chat
-    const lastSavedIndex =
-      seenCountPerConversation[conversationId] || existingMessages.length || 0;
-
-    const newMessages = [];
-
-    for (let i = lastSavedIndex; i < messageNodes.length; i++) {
-      const el = messageNodes[i];
-
-      newMessages.push({
-        role: el.getAttribute("data-message-author-role"),
-        content: el.innerText,
-        timestamp: Date.now(),
-      });
-    }
-
-    if (newMessages.length === 0) return;
-
-    const updatedMessages = [...existingMessages, ...newMessages];
-
-    // update tracker
-    seenCountPerConversation[conversationId] = updatedMessages.length;
 
     capsules[conversationId] = {
       ...existing,
+
       title: document.title || "Untitled Chat",
+
       createdAt: existing?.createdAt || new Date().toISOString(),
+
       updatedAt: new Date().toISOString(),
-      messageCount: updatedMessages.length,
-      messages: updatedMessages,
+
+      messageCount: messages.length,
+
+      messages,
     };
 
     chrome.storage.local.set(
@@ -84,7 +69,7 @@ function saveMessages() {
       },
       () => {
         console.log(
-          `💾 Saved ${newMessages.length} new messages for ${conversationId}`,
+          `💾 Saved ${messages.length} new messages for ${conversationId}`,
         );
 
         console.log(`📚 Total Capsules: ${Object.keys(capsules).length}`);
@@ -94,23 +79,25 @@ function saveMessages() {
 }
 
 function checkForChanges() {
-  const conversationId = getConversationId();
-  if (!conversationId) return;
 
-  const currentCount = document.querySelectorAll(
-    "[data-message-author-role]",
-  ).length;
+  const messages = [
+    ...document.querySelectorAll(
+      "[data-message-author-role]"
+    )
+  ];
 
-  // ignore unstable UI transitions
-  if (currentCount < 2) return;
+  const snapshot =
+    messages
+      .map(el => el.innerText)
+      .join("||");
 
-  if (currentCount !== lastCount) {
-    lastCount = currentCount;
+  if (snapshot !== lastSnapshot) {
 
-    // IMPORTANT: only save if stable
-    if (!isStableConversation()) return;
+    lastSnapshot = snapshot;
 
-    // extra safety delay (IMPORTANT)
+    if (!isStableConversation())
+      return;
+
     setTimeout(() => {
       saveMessages();
     }, 500);
