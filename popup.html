@@ -2,14 +2,50 @@
 <html>
 <head>
   <title>Memory Capsule</title>
+  <style>
+    body {
+      font-family: Arial;
+      width: 320px;
+      padding: 10px;
+    }
+
+    h2 {
+      margin-bottom: 10px;
+    }
+
+    .capsule {
+      padding: 8px;
+      border: 1px solid #ddd;
+      margin-bottom: 8px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .title {
+      font-weight: bold;
+    }
+
+    .meta {
+      font-size: 12px;
+      color: gray;
+    }
+
+    button {
+      margin-top: 10px;
+      width: 100%;
+      padding: 8px;
+      cursor: pointer;
+    }
+  </style>
 </head>
+
 <body>
 
 <h2>Memory Capsule</h2>
 
-<button id="exportBtn">
-  Export Chat
-</button>
+<div id="capsuleList"></div>
+
+<button id="exportBtn">Export Chat</button>
 
 <script src="popup.js"></script>
 
