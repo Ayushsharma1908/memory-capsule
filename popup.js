@@ -1,5 +1,8 @@
+import { generateCapsule } from "./capsulegenerator.js";
+
 function renderCapsules() {
   chrome.storage.local.get(["capsules"], (result) => {
+
     const capsules = result.capsules || {};
 
     const container =
@@ -17,6 +20,7 @@ function renderCapsules() {
     }
 
     entries.forEach(([id, capsule]) => {
+
       const div =
         document.createElement("div");
 
@@ -24,108 +28,104 @@ function renderCapsules() {
 
       div.innerHTML = `
         <div class="title">
-          ${capsule.title || "Untitled"}
+          ${capsule.title || "Untitled Chat"}
         </div>
 
         <div class="meta">
-          ${capsule.messageCount || 0}
-          messages
+          ${capsule.messageCount || 0} messages
         </div>
       `;
 
-      div.addEventListener(
-        "click",
-        () => {
-          console.log(capsule);
+      div.addEventListener("click", () => {
 
-          alert(
-            `Title: ${
-              capsule.title
-            }\nMessages: ${
-              capsule.messageCount
-            }`
-          );
-        }
-      );
+        chrome.storage.local.set({
+          selectedConversationId: id
+        });
+
+        alert(
+          `Selected:\n${capsule.title}`
+        );
+
+      });
 
       container.appendChild(div);
+
     });
+
   });
 }
 
+/*
+==================================
+GENERATE CAPSULE BUTTON
+==================================
+*/
+
 document
-  .getElementById("exportBtn")
-  .addEventListener("click", () => {
+  .getElementById("generateCapsuleBtn")
+  .addEventListener("click", async () => {
 
-    chrome.storage.local.get(
-      [
+    const result =
+      await chrome.storage.local.get([
         "capsules",
-        "currentConversationId"
+        "selectedConversationId"
+      ]);
+
+    const conversationId =
+      result.selectedConversationId;
+
+    if (!conversationId) {
+      alert("Select a chat first");
+      return;
+    }
+
+    const capsule =
+      result.capsules?.[conversationId];
+
+    if (!capsule) {
+      alert("Capsule not found");
+      return;
+    }
+
+    // Generate AI Capsule
+    const generatedCapsule =
+      generateCapsule(capsule);
+
+    console.log(
+      "Generated Capsule:",
+      generatedCapsule
+    );
+
+    // Download it
+    const blob = new Blob(
+      [
+        JSON.stringify(
+          generatedCapsule,
+          null,
+          2
+        )
       ],
-      (result) => {
-
-        const capsules =
-          result.capsules || {};
-
-        const conversationId =
-          result.currentConversationId;
-
-        console.log(
-          "Current ID:",
-          conversationId
-        );
-
-        if (!conversationId) {
-          alert(
-            "No active chat found.\n\nOpen a ChatGPT conversation and send at least one message."
-          );
-          return;
-        }
-
-        const capsule =
-          capsules[conversationId];
-
-        if (!capsule) {
-          alert(
-            "Capsule not found."
-          );
-          return;
-        }
-
-        const blob = new Blob(
-          [
-            JSON.stringify(
-              capsule,
-              null,
-              2
-            )
-          ],
-          {
-            type:
-              "application/json"
-          }
-        );
-
-        const url =
-          URL.createObjectURL(blob);
-
-        const a =
-          document.createElement("a");
-
-        a.href = url;
-
-        a.download =
-          `capsule-${conversationId}.json`;
-
-        a.click();
-
-        URL.revokeObjectURL(url);
-
-        console.log(
-          "📦 Exported current chat"
-        );
+      {
+        type: "application/json"
       }
     );
+
+    const url =
+      URL.createObjectURL(blob);
+
+    const a =
+      document.createElement("a");
+
+    a.href = url;
+
+    a.download =
+      `${generatedCapsule.title}-capsule.json`;
+
+    a.click();
+
+    URL.revokeObjectURL(url);
+
+    alert("Capsule Generated 🚀");
 
   });
 
