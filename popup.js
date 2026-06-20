@@ -53,77 +53,117 @@ GENERATE CAPSULE BUTTON
 document
   .getElementById("generateCapsuleBtn")
   .addEventListener("click", async () => {
+    const result = await chrome.storage.local.get([
+      "capsules",
+      "selectedConversationId",
+    ]);
 
-    const result =
-      await chrome.storage.local.get([
-        "capsules",
-        "selectedConversationId"
-      ]);
-
-    const conversationId =
-      result.selectedConversationId;
+    const conversationId = result.selectedConversationId;
 
     if (!conversationId) {
       alert("Select a chat first");
       return;
     }
 
-    const capsule =
-      result.capsules?.[conversationId];
+    const capsule = result.capsules?.[conversationId];
 
     if (!capsule) {
       alert("Capsule not found");
       return;
     }
 
-    const conversationText =
-      capsule.messages
-        .map(
-          m =>
-            `${m.role}: ${m.content}`
-        )
-        .join("\n\n");
+    const conversationText = capsule.messages
+      .map((m) => `${m.role}: ${m.content}`)
+      .join("\n\n");
 
-    const generatedCapsule =
-      await generateAICapsule(
-        conversationText
-      );
+    let generatedCapsule;
 
-    console.log(
-      "AI Capsule:",
-      generatedCapsule
-    );
+    try {
+      const aiCapsule = await generateAICapsule(conversationText);
 
-    const blob = new Blob(
-      [
-        JSON.stringify(
-          generatedCapsule,
-          null,
-          2
-        )
-      ],
-      {
-        type: "application/json"
-      }
-    );
+      generatedCapsule = {
+        ...aiCapsule,
 
-    const url =
-      URL.createObjectURL(blob);
+        metadata: {
+          createdAt: capsule.createdAt,
 
-    const a =
-      document.createElement("a");
+          updatedAt: capsule.updatedAt,
+
+          messageCount: capsule.messageCount,
+        },
+
+        conversation: capsule.messages,
+      };
+
+      const storage = await chrome.storage.local.get("aiCapsules");
+
+      const aiCapsules = storage.aiCapsules || {};
+
+      aiCapsules[conversationId] = generatedCapsule;
+
+      await chrome.storage.local.set({
+        aiCapsules,
+      });
+
+      console.log("AI Capsule:", generatedCapsule);
+    } catch (error) {
+      console.error(error);
+
+      alert("Gemini Error:\n" + error.message);
+
+      return;
+    }
+    console.log("AI Capsule:", generatedCapsule);
+
+    const blob = new Blob([JSON.stringify(generatedCapsule, null, 2)], {
+      type: "application/json",
+    });
+
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
 
     a.href = url;
 
-    a.download =
-      "memory-capsule.json";
+    a.download = "memory-capsule.json";
 
     a.click();
 
     URL.revokeObjectURL(url);
+    await renderGeneratedCapsules();
 
     alert("AI Capsule Generated 🚀");
-
   });
 
+
+async function renderGeneratedCapsules() {
+  const result = await chrome.storage.local.get("aiCapsules");
+
+  const capsules = result.aiCapsules || {};
+
+  const container = document.getElementById("generatedCapsules");
+
+  container.innerHTML = "";
+
+  Object.entries(capsules).forEach(([id, capsule]) => {
+    const div = document.createElement("div");
+
+    div.className = "capsule";
+
+    div.innerHTML = `
+        <div class="title">
+          ${capsule.title}
+        </div>
+
+        <div class="meta">
+          ${capsule.keyTopics.length || 0}
+          topics
+        </div>
+      `;
+
+    container.appendChild(div);
+  });
+}
+
 renderCapsules();
+renderGeneratedCapsules();
