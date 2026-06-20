@@ -1,28 +1,23 @@
 import { generateCapsule } from "./capsulegenerator.js";
+import { generateAICapsule } from "./aigenerator.js";
 
 function renderCapsules() {
   chrome.storage.local.get(["capsules"], (result) => {
-
     const capsules = result.capsules || {};
 
-    const container =
-      document.getElementById("capsuleList");
+    const container = document.getElementById("capsuleList");
 
     container.innerHTML = "";
 
-    const entries =
-      Object.entries(capsules);
+    const entries = Object.entries(capsules);
 
     if (entries.length === 0) {
-      container.innerHTML =
-        "<p>No capsules found</p>";
+      container.innerHTML = "<p>No capsules found</p>";
       return;
     }
 
     entries.forEach(([id, capsule]) => {
-
-      const div =
-        document.createElement("div");
+      const div = document.createElement("div");
 
       div.className = "capsule";
 
@@ -37,21 +32,15 @@ function renderCapsules() {
       `;
 
       div.addEventListener("click", () => {
-
         chrome.storage.local.set({
-          selectedConversationId: id
+          selectedConversationId: id,
         });
 
-        alert(
-          `Selected:\n${capsule.title}`
-        );
-
+        alert(`Selected:\n${capsule.title}`);
       });
 
       container.appendChild(div);
-
     });
-
   });
 }
 
@@ -87,16 +76,24 @@ document
       return;
     }
 
-    // Generate AI Capsule
+    const conversationText =
+      capsule.messages
+        .map(
+          m =>
+            `${m.role}: ${m.content}`
+        )
+        .join("\n\n");
+
     const generatedCapsule =
-      generateCapsule(capsule);
+      await generateAICapsule(
+        conversationText
+      );
 
     console.log(
-      "Generated Capsule:",
+      "AI Capsule:",
       generatedCapsule
     );
 
-    // Download it
     const blob = new Blob(
       [
         JSON.stringify(
@@ -119,13 +116,13 @@ document
     a.href = url;
 
     a.download =
-      `${generatedCapsule.title}-capsule.json`;
+      "memory-capsule.json";
 
     a.click();
 
     URL.revokeObjectURL(url);
 
-    alert("Capsule Generated 🚀");
+    alert("AI Capsule Generated 🚀");
 
   });
 
