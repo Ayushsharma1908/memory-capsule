@@ -44,12 +44,7 @@ function renderCapsules() {
   });
 }
 
-/*
-==================================
-GENERATE CAPSULE BUTTON
-==================================
-*/
-
+// Capsule Generation
 document
   .getElementById("generateCapsuleBtn")
   .addEventListener("click", async () => {
@@ -73,8 +68,9 @@ document
     }
 
     const conversationText = capsule.messages
-      .map((m) => `${m.role}: ${m.content}`)
-      .join("\n\n");
+      .filter((m) => m.role === "user")
+      .map((m) => m.content)
+      .join("\n");
 
     let generatedCapsule;
 
@@ -134,7 +130,6 @@ document
 
     alert("AI Capsule Generated 🚀");
   });
-
 
 async function renderGeneratedCapsules() {
   const result = await chrome.storage.local.get("aiCapsules");
