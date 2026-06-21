@@ -68,9 +68,9 @@ document
     }
 
     const conversationText = capsule.messages
-      .filter((m) => m.role === "user")
-      .map((m) => m.content)
-      .join("\n");
+      .filter((m) => m.content && m.content.trim())
+      .map((m) => `${m.role}: ${m.content}`)
+      .join("\n\n");
 
     let generatedCapsule;
 
