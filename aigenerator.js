@@ -1,97 +1,78 @@
-import { GEMINI_API_KEY }
-from "./config.js";
+import { GEMINI_API_KEY } from "./config.js";
 
 export async function generateAICapsule(conversationText) {
 
 const prompt = `
 You are an AI Memory Capsule Generator.
 
-Your job is NOT to summarize every message.
+Create a reusable memory capsule from this conversation.
 
-Your task:
-
-1. Identify what the user was trying to learn.
-2. Identify what the user achieved.
-3. Extract the most important topics.
-4. Generate memorable insights.
+Your goal is to capture what the user learned, discovered, decided, or achieved.
 
 Return ONLY valid JSON:
 
 {
-  "title":"",
-  "summary":"",
-  "keyTopics":[],
-  "insights":[]
+  "title": "",
+  "summary": "",
+  "keyTopics": [],
+  "insights": []
 }
 
-Rules:
+Instructions:
 
-- Focus on user intent.
-- Ignore greetings.
-- Ignore filler conversation.
-- Group related questions together.
-- Keep summary under 100 words.
-- Maximum 10 keyTopics.
-- Maximum 5 insights.
-- Title should be short and meaningful.
-- Do NOT explain every assistant response.
+- Focus on the user's learning journey.
+- Combine related questions into one topic.
+- Ignore greetings, filler messages, and repeated explanations.
+- Do NOT summarize every assistant response.
+- Extract the core knowledge gained.
+- Summary must be less than 80 words.
+- keyTopics maximum 8 items.
+- insights maximum 5 items.
+- Make insights actionable and memorable.
+- Title should represent the overall learning outcome.
 
 Conversation:
 
 ${conversationText}
 `;
 
-  const response =
-    await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        method: "POST",
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+    {
+      method: "POST",
 
-        headers: {
-          "Content-Type":
-            "application/json"
-        },
+      headers: {
+        "Content-Type": "application/json",
+      },
 
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: prompt
-                }
-              ]
-            }
-          ]
-        })
-      }
-    );
-
-  const data =
-    await response.json();
-
-  console.log(
-    "Gemini Response:",
-    data
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              {
+                text: prompt,
+              },
+            ],
+          },
+        ],
+      }),
+    },
   );
 
-  const text =
-    data.candidates?.[0]
-      ?.content?.parts?.[0]
-      ?.text;
+  const data = await response.json();
+
+  console.log("Gemini Response:", data);
+
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
   if (!text) {
-    throw new Error(
-      "No response from Gemini"
-    );
+    throw new Error("No response from Gemini");
   }
 
-  const cleanJson =
-    text
-      .replace(/```json/g, "")
-      .replace(/```/g, "")
-      .trim();
+  const cleanJson = text
+    .replace(/```json/g, "")
+    .replace(/```/g, "")
+    .trim();
 
-  return JSON.parse(
-    cleanJson
-  );
+  return JSON.parse(cleanJson);
 }
