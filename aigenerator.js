@@ -59,9 +59,19 @@ ${conversationText}
     },
   );
 
-  const data = await response.json();
+  let data;
 
-  console.log("Gemini Response:", data);
+  try {
+    data = await response.json();
+  } catch (_error) {
+    throw new Error("Gemini returned a response that could not be read.");
+  }
+
+  if (!response.ok) {
+    const message =
+      data.error?.message || `Gemini request failed with status ${response.status}`;
+    throw new Error(message);
+  }
 
   const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
@@ -70,9 +80,13 @@ ${conversationText}
   }
 
   const cleanJson = text
-    .replace(/```json/g, "")
-    .replace(/```/g, "")
+    .replace(/```(?:json)?\s*/gi, "")
+    .replace(/```\s*/g, "")
     .trim();
 
-  return JSON.parse(cleanJson);
+  try {
+    return JSON.parse(cleanJson);
+  } catch (_error) {
+    throw new Error("Gemini returned invalid JSON.");
+  }
 }
