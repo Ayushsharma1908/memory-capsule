@@ -13,11 +13,11 @@
   "content_scripts": [
     {
       "matches": ["https://chatgpt.com/*"],
-      "js": ["content.js"]
+      "js": ["content/content.js"]
     }
   ],
 
   "action": {
-    "default_popup": "popup.html"
+    "default_popup": "popup/popup.html"
   }
 }
