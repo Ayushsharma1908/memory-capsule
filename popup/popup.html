@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Memory Capsule</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+
+  <body>
+    <div class="container">
+      <h1>🧠 Memory Capsule</h1>
+
+      <!-- Current Chat -->
+      <section id="currentChatSection">
+        <h2>📍 Current Chat</h2>
+        <div id="currentChat">
+          <div class="empty-state">Loading active chat...</div>
+        </div>
+      </section>
+
+      <!-- Recent Chats -->
+      <section>
+        <h2>🕒 Recent Chats</h2>
+        <div id="capsuleList"></div>
+        <button id="seeMoreChats" class="see-more" style="display: none;">See More →</button>
+      </section>
+
+      <!-- Generated Capsules -->
+      <section>
+        <h2>🧠 Generated Capsules</h2>
+        <div id="generatedCapsules"></div>
+        <button id="seeMoreCapsules" class="see-more" style="display: none;">See More →</button>
+      </section>
+      
+      <div id="status"></div>
+    </div>
+    
+    <footer>
+      Memory Capsule v1.0
+    </footer>
+    
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>
