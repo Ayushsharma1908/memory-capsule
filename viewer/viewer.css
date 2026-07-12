@@ -1,0 +1,129 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', Arial, sans-serif;
+}
+
+body {
+  background: #f5f7fb;
+  padding: 30px;
+  color: #222;
+  line-height: 1.5;
+}
+
+.container {
+  max-width: 900px;
+  margin: auto;
+}
+
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+.header-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.header-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+h1 {
+  font-size: 28px;
+  color: #111;
+  font-weight: 700;
+}
+
+h2 {
+  margin-bottom: 16px;
+  color: #333;
+  font-size: 20px;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 10px;
+}
+
+.download-btn {
+  background: #1a73e8;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.download-btn:hover {
+  background: #155bb5;
+}
+
+#summary {
+  font-size: 16px;
+  color: #444;
+}
+
+#topics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.topic {
+  background: #e8f0fe;
+  color: #1a73e8;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.insight {
+  margin-bottom: 12px;
+  padding-left: 12px;
+  border-left: 3px solid #fbbc04;
+}
+
+.message {
+  padding: 16px;
+  margin-bottom: 16px;
+  background: #fafafa;
+  border-radius: 8px;
+  border: 1px solid #eee;
+}
+
+.message.user {
+  border-left: 4px solid #1a73e8;
+}
+
+.message.assistant {
+  border-left: 4px solid #34a853;
+}
+
+.role {
+  font-weight: bold;
+  margin-bottom: 8px;
+  text-transform: capitalize;
+  font-size: 14px;
+}
+
+.content {
+  white-space: pre-wrap;
+  font-size: 15px;
+  color: #333;
+}
+
+.meta {
+  color: #666;
+  font-size: 14px;
+  display: flex;
+  gap: 16px;
+}

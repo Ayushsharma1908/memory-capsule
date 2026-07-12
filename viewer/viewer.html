@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memory Capsule Viewer</title>
+  <link rel="stylesheet" href="viewer.css">
+</head>
+<body>
+
+<div class="container" id="mainContainer">
+  <div class="card header-card">
+    <div class="header-actions">
+      <h1 id="title">Loading Capsule...</h1>
+      <button id="downloadBtn" class="download-btn" style="display: none;">Download JSON</button>
+    </div>
+    <p id="summary"></p>
+    <div class="meta" id="metadata"></div>
+  </div>
+
+  <div class="card" id="topicsCard" style="display: none;">
+    <h2>🏷 Key Topics</h2>
+    <div id="topics"></div>
+  </div>
+
+  <div class="card" id="insightsCard" style="display: none;">
+    <h2>💡 Insights</h2>
+    <div id="insights"></div>
+  </div>
+
+  <div class="card" id="conversationCard" style="display: none;">
+    <h2>💬 Original Conversation</h2>
+    <div id="conversation"></div>
+  </div>
+</div>
+
+<script src="viewer.js"></script>
+</body>
+</html>
