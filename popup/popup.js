@@ -69,6 +69,12 @@ function downloadJson(fileName, data) {
   URL.revokeObjectURL(url);
 }
 
+function updateIcons() {
+  if (window.lucide) {
+    window.lucide.createIcons();
+  }
+}
+
 // ========================================================
 // RENDERING
 // ========================================================
@@ -84,26 +90,38 @@ async function renderCurrentChat() {
   container.innerHTML = "";
   
   if (!currentId || !storage.capsules[currentId]) {
-    container.innerHTML = '<div class="empty-state">No active chat detected.</div>';
+    container.innerHTML = `
+      <div class="empty-state">
+        <i data-lucide="search"></i>
+        <p>No conversations captured yet.</p>
+      </div>`;
+    updateIcons();
     return;
   }
   
   const capsule = storage.capsules[currentId];
   
   const card = document.createElement("div");
-  card.className = "capsule";
+  card.className = "capsule-card hero-card";
   card.innerHTML = `
-    <span class="title">${capsule.title || "Untitled Chat"}</span>
-    <span class="meta">${capsule.messageCount || 0} messages</span>
+    <div class="card-title">${capsule.title || "Untitled Chat"}</div>
+    <div class="card-meta">
+      <i data-lucide="message-square" style="width: 14px; height: 14px;"></i>
+      ${capsule.messageCount || 0} messages
+    </div>
     <div class="action-buttons">
-      <button id="generateCurrentCapsule">Generate Capsule</button>
-      <button id="exportCurrentChat" class="secondary-button">Export Chat</button>
+      <button id="generateCurrentCapsule" class="primary-button">
+        <i data-lucide="sparkles"></i> Generate Capsule
+      </button>
+      <button id="exportCurrentChat" class="secondary-button">
+        <i data-lucide="download"></i> Export
+      </button>
     </div>
   `;
   container.appendChild(card);
   
   document.getElementById("generateCurrentCapsule").addEventListener("click", async (e) => {
-    const btn = e.target;
+    const btn = e.currentTarget;
     try {
       btn.disabled = true;
       setStatus("Generating Capsule...");
@@ -125,6 +143,8 @@ async function renderCurrentChat() {
       setStatus(error.message, true);
     }
   });
+
+  updateIcons();
 }
 
 async function renderCapsules() {
@@ -137,8 +157,13 @@ async function renderCapsules() {
   const recentChats = entries.filter(([id]) => id !== storage.currentConversationId);
   
   if (recentChats.length === 0) {
-    capsuleList.innerHTML = '<div class="empty-state">No recent chats found.</div>';
+    capsuleList.innerHTML = `
+      <div class="empty-state">
+        <i data-lucide="clock-3"></i>
+        <p>No recent conversations.</p>
+      </div>`;
     document.getElementById("seeMoreChats").style.display = "none";
+    updateIcons();
     return;
   }
   
@@ -146,13 +171,20 @@ async function renderCapsules() {
   
   for (const [id, capsule] of visible) {
     const item = document.createElement("div");
-    item.className = "capsule";
+    item.className = "capsule-card";
     
-    const updatedAt = capsule.updatedAt ? new Date(capsule.updatedAt).toLocaleString() : "Not dated";
+    const updatedAt = capsule.updatedAt 
+      ? new Date(capsule.updatedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) 
+      : "Not dated";
     
     item.innerHTML = `
-      <span class="title">${capsule.title || "Untitled Chat"}</span>
-      <span class="meta">${capsule.messageCount || 0} messages - ${updatedAt}</span>
+      <div class="card-title">${capsule.title || "Untitled Chat"}</div>
+      <div class="card-meta">
+        <i data-lucide="message-square" style="width: 14px; height: 14px;"></i>
+        ${capsule.messageCount || 0} messages
+        <span style="margin: 0 4px;">•</span>
+        ${updatedAt}
+      </div>
     `;
     
     item.addEventListener("click", () => {
@@ -164,10 +196,12 @@ async function renderCapsules() {
   
   const seeMoreBtn = document.getElementById("seeMoreChats");
   if (recentChats.length > visibleChats) {
-    seeMoreBtn.style.display = "block";
+    seeMoreBtn.style.display = "flex";
   } else {
     seeMoreBtn.style.display = "none";
   }
+
+  updateIcons();
 }
 
 async function renderGeneratedCapsules() {
@@ -178,8 +212,13 @@ async function renderGeneratedCapsules() {
   generatedCapsules.textContent = "";
   
   if (entries.length === 0) {
-    generatedCapsules.innerHTML = '<div class="empty-state">No generated capsules.</div>';
+    generatedCapsules.innerHTML = `
+      <div class="empty-state">
+        <i data-lucide="brain"></i>
+        <p>Generate your first AI Capsule.</p>
+      </div>`;
     document.getElementById("seeMoreCapsules").style.display = "none";
+    updateIcons();
     return;
   }
   
@@ -187,11 +226,21 @@ async function renderGeneratedCapsules() {
   
   for (const [id, capsule] of visible) {
     const item = document.createElement("div");
-    item.className = "capsule";
+    item.className = "capsule-card";
     
+    const updatedAt = capsule.updatedAt 
+      ? new Date(capsule.updatedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) 
+      : "";
+
     item.innerHTML = `
-      <span class="title">${capsule.title || "Untitled Capsule"}</span>
-      <span class="meta">${capsule.keyTopics?.length || 0} topics</span>
+      <div class="card-title">${capsule.title || "Untitled Capsule"}</div>
+      <div class="card-meta">
+        <span class="ai-badge"><i data-lucide="sparkles"></i> AI</span>
+        <span style="margin: 0 4px;">•</span>
+        ${capsule.keyTopics?.length || 0} topics
+        <span style="margin: 0 4px;">•</span>
+        ${updatedAt}
+      </div>
     `;
     
     item.addEventListener("click", () => {
@@ -203,10 +252,12 @@ async function renderGeneratedCapsules() {
   
   const seeMoreBtn = document.getElementById("seeMoreCapsules");
   if (entries.length > visibleCapsules) {
-    seeMoreBtn.style.display = "block";
+    seeMoreBtn.style.display = "flex";
   } else {
     seeMoreBtn.style.display = "none";
   }
+
+  updateIcons();
 }
 
 // ========================================================
@@ -310,6 +361,11 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
 // ========================================================
 // INITIALIZATION
 // ========================================================
+
+// Init lucide icons on load for static icons
+document.addEventListener("DOMContentLoaded", () => {
+  updateIcons();
+});
 
 requestActiveChatCapture()
   .catch(() => undefined)

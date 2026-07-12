@@ -3,41 +3,77 @@
   <head>
     <meta charset="UTF-8" />
     <title>Memory Capsule</title>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="popup.css" />
   </head>
 
   <body>
     <div class="container">
-      <h1>🧠 Memory Capsule</h1>
+      <header>
+        <div class="logo">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="4" y="5" width="16" height="14" rx="7" fill="#E0E7FF" />
+            <path d="M12 9V15M9 12H15" stroke="#5661D8" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <h1>Memory Capsule</h1>
+        </div>
+        <button class="icon-button" aria-label="Settings">
+          <i data-lucide="settings"></i>
+        </button>
+      </header>
 
       <!-- Current Chat -->
       <section id="currentChatSection">
-        <h2>📍 Current Chat</h2>
+        <div class="section-header">
+          <i data-lucide="message-square"></i>
+          <div>
+            <h2>Current Chat</h2>
+            <p>The conversation you are currently viewing.</p>
+          </div>
+        </div>
         <div id="currentChat">
-          <div class="empty-state">Loading active chat...</div>
+          <div class="empty-state">
+            <i data-lucide="search"></i>
+            <p>No active chat detected.</p>
+          </div>
         </div>
       </section>
 
       <!-- Recent Chats -->
       <section>
-        <h2>🕒 Recent Chats</h2>
+        <div class="section-header">
+          <i data-lucide="clock-3"></i>
+          <div>
+            <h2>Recent Chats</h2>
+            <p>Your previously captured conversations.</p>
+          </div>
+        </div>
         <div id="capsuleList"></div>
-        <button id="seeMoreChats" class="see-more" style="display: none;">See More →</button>
+        <button id="seeMoreChats" class="see-more" style="display: none;">
+          See More <i data-lucide="chevron-right"></i>
+        </button>
       </section>
 
       <!-- Generated Capsules -->
       <section>
-        <h2>🧠 Generated Capsules</h2>
+        <div class="section-header">
+          <i data-lucide="brain"></i>
+          <div>
+            <h2>Generated Capsules</h2>
+            <p>AI-generated summaries of your conversations.</p>
+          </div>
+        </div>
         <div id="generatedCapsules"></div>
-        <button id="seeMoreCapsules" class="see-more" style="display: none;">See More →</button>
+        <button id="seeMoreCapsules" class="see-more" style="display: none;">
+          See More <i data-lucide="chevron-right"></i>
+        </button>
       </section>
       
       <div id="status"></div>
     </div>
-    
-    <footer>
-      Memory Capsule v1.0
-    </footer>
     
     <script type="module" src="popup.js"></script>
   </body>
