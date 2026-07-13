@@ -48,7 +48,7 @@ function renderCapsule(capsule) {
 
   // Download Button
   const downloadBtn = document.getElementById('downloadBtn');
-  downloadBtn.style.display = 'block';
+  downloadBtn.style.display = 'inline-flex';
   downloadBtn.addEventListener('click', () => {
     const blob = new Blob([JSON.stringify(capsule, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -104,5 +104,9 @@ function renderCapsule(capsule) {
       msgEl.appendChild(contentEl);
       conversationContainer.appendChild(msgEl);
     });
+  }
+  
+  if (window.lucide) {
+    window.lucide.createIcons();
   }
 }

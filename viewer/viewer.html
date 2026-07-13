@@ -4,6 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Memory Capsule Viewer</title>
+  <!-- Fonts: DM Sans and Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Local Lucide Icons -->
+  <script src="../assets/lucide.min.js"></script>
   <link rel="stylesheet" href="viewer.css">
 </head>
 <body>
@@ -12,24 +18,35 @@
   <div class="card header-card">
     <div class="header-actions">
       <h1 id="title">Loading Capsule...</h1>
-      <button id="downloadBtn" class="download-btn" style="display: none;">Download JSON</button>
+      <button id="downloadBtn" class="primary-button" style="display: none;">
+        <i data-lucide="download"></i> Download JSON
+      </button>
     </div>
-    <p id="summary"></p>
+    <p id="summary" class="summary-text"></p>
     <div class="meta" id="metadata"></div>
   </div>
 
   <div class="card" id="topicsCard" style="display: none;">
-    <h2>🏷 Key Topics</h2>
+    <div class="card-header">
+      <div class="icon-wrapper blue"><i data-lucide="tag"></i></div>
+      <h2>Key Topics</h2>
+    </div>
     <div id="topics"></div>
   </div>
 
   <div class="card" id="insightsCard" style="display: none;">
-    <h2>💡 Insights</h2>
+    <div class="card-header">
+      <div class="icon-wrapper orange"><i data-lucide="lightbulb"></i></div>
+      <h2>Insights</h2>
+    </div>
     <div id="insights"></div>
   </div>
 
   <div class="card" id="conversationCard" style="display: none;">
-    <h2>💬 Original Conversation</h2>
+    <div class="card-header">
+      <div class="icon-wrapper green"><i data-lucide="message-circle"></i></div>
+      <h2>Original Conversation</h2>
+    </div>
     <div id="conversation"></div>
   </div>
 </div>
