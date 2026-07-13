@@ -2,10 +2,20 @@ import { generateCapsule } from "../ai/capsulegenerator.js";
 import { generateAICapsule } from "../ai/aigenerator.js";
 
 // ========================================================
-// STORAGE HELPERS
+// UTILS & STORAGE HELPERS
 // ========================================================
 
 const STORAGE_KEYS = ["capsules", "currentConversationId", "aiCapsules"];
+
+function escapeHTML(str) {
+  if (typeof str !== "string") return "";
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
 
 function storageGet(keys) {
   return new Promise((resolve, reject) => {
@@ -52,21 +62,23 @@ function sortByUpdatedAt(entries) {
   });
 }
 
+let toastTimeout;
 function setStatus(message, isError = false) {
-  const statusElement = document.getElementById("status");
-  if (!statusElement) return;
-  statusElement.textContent = message || "";
-  statusElement.className = isError ? "error" : "";
-}
-
-function downloadJson(fileName, data) {
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = fileName;
-  link.click();
-  URL.revokeObjectURL(url);
+  const toast = document.getElementById("toast");
+  if (!toast) return;
+  
+  toast.textContent = message || "";
+  if (!message) {
+    toast.className = "toast";
+    return;
+  }
+  
+  toast.className = isError ? "toast show error" : "toast show";
+  
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => {
+    toast.className = "toast";
+  }, isError ? 5000 : 3000);
 }
 
 function updateIcons() {
@@ -79,8 +91,9 @@ function updateIcons() {
 // RENDERING
 // ========================================================
 
-let visibleChats = 3;
-let visibleCapsules = 3;
+let isChatsExpanded = false;
+let isCapsulesExpanded = false;
+const DEFAULT_VISIBLE = 3;
 
 async function renderCurrentChat() {
   const storage = await getStorage();
@@ -92,10 +105,10 @@ async function renderCurrentChat() {
   if (!currentId || !storage.capsules[currentId]) {
     container.innerHTML = `
       <div class="empty-state">
-        <i data-lucide="search"></i>
-        <p>No conversations captured yet.</p>
+        <div class="emoji">🔍</div>
+        <h3>No active chat</h3>
+        <p>Open a ChatGPT conversation to get started.</p>
       </div>`;
-    updateIcons();
     return;
   }
   
@@ -104,7 +117,7 @@ async function renderCurrentChat() {
   const card = document.createElement("div");
   card.className = "capsule-card hero-card";
   card.innerHTML = `
-    <div class="card-title">${capsule.title || "Untitled Chat"}</div>
+    <div class="card-title">${escapeHTML(capsule.title || "Untitled Chat")}</div>
     <div class="card-meta">
       <i data-lucide="message-square" style="width: 14px; height: 14px;"></i>
       ${capsule.messageCount || 0} messages
@@ -124,21 +137,23 @@ async function renderCurrentChat() {
     const btn = e.currentTarget;
     try {
       btn.disabled = true;
-      setStatus("Generating Capsule...");
+      setStatus("Generating...");
       await generateCurrentAICapsule();
-      setStatus("Capsule Generated!");
+      setStatus("Generated Successfully");
     } catch (error) {
       setStatus(error.message, true);
     } finally {
-      btn.disabled = false;
+      if (document.body.contains(btn)) {
+        btn.disabled = false;
+      }
     }
   });
 
-  document.getElementById("exportCurrentChat").addEventListener("click", async (e) => {
+  document.getElementById("exportCurrentChat").addEventListener("click", async () => {
     try {
       setStatus("Exporting...");
       await exportCurrentConversation();
-      setStatus("");
+      setStatus("Exported");
     } catch (error) {
       setStatus(error.message, true);
     }
@@ -155,19 +170,21 @@ async function renderCapsules() {
   capsuleList.textContent = "";
   
   const recentChats = entries.filter(([id]) => id !== storage.currentConversationId);
+  const seeMoreBtn = document.getElementById("seeMoreChats");
   
   if (recentChats.length === 0) {
     capsuleList.innerHTML = `
       <div class="empty-state">
-        <i data-lucide="clock-3"></i>
-        <p>No recent conversations.</p>
+        <div class="emoji">⏳</div>
+        <h3>No recent chats</h3>
+        <p>Your history will appear here.</p>
       </div>`;
-    document.getElementById("seeMoreChats").style.display = "none";
-    updateIcons();
+    seeMoreBtn.style.display = "none";
     return;
   }
   
-  const visible = recentChats.slice(0, visibleChats);
+  const limit = isChatsExpanded ? recentChats.length : DEFAULT_VISIBLE;
+  const visible = recentChats.slice(0, limit);
   
   for (const [id, capsule] of visible) {
     const item = document.createElement("div");
@@ -178,7 +195,7 @@ async function renderCapsules() {
       : "Not dated";
     
     item.innerHTML = `
-      <div class="card-title">${capsule.title || "Untitled Chat"}</div>
+      <div class="card-title">${escapeHTML(capsule.title || "Untitled Chat")}</div>
       <div class="card-meta">
         <i data-lucide="message-square" style="width: 14px; height: 14px;"></i>
         ${capsule.messageCount || 0} messages
@@ -194,9 +211,10 @@ async function renderCapsules() {
     capsuleList.appendChild(item);
   }
   
-  const seeMoreBtn = document.getElementById("seeMoreChats");
-  if (recentChats.length > visibleChats) {
+  if (recentChats.length > DEFAULT_VISIBLE) {
     seeMoreBtn.style.display = "flex";
+    seeMoreBtn.querySelector(".see-more-text").textContent = isChatsExpanded ? "See Less" : "See More";
+    seeMoreBtn.classList.toggle("expanded", isChatsExpanded);
   } else {
     seeMoreBtn.style.display = "none";
   }
@@ -211,18 +229,21 @@ async function renderGeneratedCapsules() {
   const generatedCapsules = document.getElementById("generatedCapsules");
   generatedCapsules.textContent = "";
   
+  const seeMoreBtn = document.getElementById("seeMoreCapsules");
+
   if (entries.length === 0) {
     generatedCapsules.innerHTML = `
       <div class="empty-state">
-        <i data-lucide="brain"></i>
-        <p>Generate your first AI Capsule.</p>
+        <div class="emoji">🧠</div>
+        <h3>No Memory Capsules Yet</h3>
+        <p>Generate your first AI memory.</p>
       </div>`;
-    document.getElementById("seeMoreCapsules").style.display = "none";
-    updateIcons();
+    seeMoreBtn.style.display = "none";
     return;
   }
   
-  const visible = entries.slice(0, visibleCapsules);
+  const limit = isCapsulesExpanded ? entries.length : DEFAULT_VISIBLE;
+  const visible = entries.slice(0, limit);
   
   for (const [id, capsule] of visible) {
     const item = document.createElement("div");
@@ -233,7 +254,7 @@ async function renderGeneratedCapsules() {
       : "";
 
     item.innerHTML = `
-      <div class="card-title">${capsule.title || "Untitled Capsule"}</div>
+      <div class="card-title">${escapeHTML(capsule.title || "Untitled Capsule")}</div>
       <div class="card-meta">
         <span class="ai-badge"><i data-lucide="sparkles"></i> AI</span>
         <span style="margin: 0 4px;">•</span>
@@ -250,9 +271,10 @@ async function renderGeneratedCapsules() {
     generatedCapsules.appendChild(item);
   }
   
-  const seeMoreBtn = document.getElementById("seeMoreCapsules");
-  if (entries.length > visibleCapsules) {
+  if (entries.length > DEFAULT_VISIBLE) {
     seeMoreBtn.style.display = "flex";
+    seeMoreBtn.querySelector(".see-more-text").textContent = isCapsulesExpanded ? "See Less" : "See More";
+    seeMoreBtn.classList.toggle("expanded", isCapsulesExpanded);
   } else {
     seeMoreBtn.style.display = "none";
   }
@@ -269,12 +291,22 @@ async function requestActiveChatCapture() {
   
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (!tab?.id || !tab.url?.startsWith("https://chatgpt.com/")) return;
+    if (!tab?.id || typeof tab.url !== 'string' || !tab.url.startsWith("https://chatgpt.com/")) return;
     
     await chrome.tabs.sendMessage(tab.id, { type: "MEMORY_CAPSULE_CAPTURE_NOW" });
   } catch (_error) {
     // Content script might not be injected
   }
+}
+
+function downloadJson(fileName, data) {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fileName;
+  link.click();
+  URL.revokeObjectURL(url);
 }
 
 async function exportCurrentConversation() {
@@ -301,7 +333,7 @@ async function generateCurrentAICapsule() {
   
   const messages = Array.isArray(capsule.messages) ? capsule.messages : [];
   const conversationText = messages
-    .filter((m) => m.content && m.content.trim())
+    .filter((m) => m && typeof m.content === "string" && m.content.trim().length > 0)
     .map((m) => `${m.role}: ${m.content}`)
     .join("\n\n");
     
@@ -326,9 +358,6 @@ async function generateCurrentAICapsule() {
   };
   
   await storageSet({ aiCapsules });
-  // Removed downloadJson to match requirements (capsule generation is saved directly)
-  // Re-render generated capsules instantly
-  await renderGeneratedCapsules();
 }
 
 // ========================================================
@@ -336,12 +365,12 @@ async function generateCurrentAICapsule() {
 // ========================================================
 
 document.getElementById("seeMoreChats").addEventListener("click", () => {
-  visibleChats += 5;
+  isChatsExpanded = !isChatsExpanded;
   renderCapsules();
 });
 
 document.getElementById("seeMoreCapsules").addEventListener("click", () => {
-  visibleCapsules += 5;
+  isCapsulesExpanded = !isCapsulesExpanded;
   renderGeneratedCapsules();
 });
 
@@ -362,10 +391,7 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
 // INITIALIZATION
 // ========================================================
 
-// Init lucide icons on load for static icons
-document.addEventListener("DOMContentLoaded", () => {
-  updateIcons();
-});
+updateIcons();
 
 requestActiveChatCapture()
   .catch(() => undefined)
@@ -376,3 +402,4 @@ requestActiveChatCapture()
       renderGeneratedCapsules(),
     ]).catch((error) => setStatus(error.message || "Failed to load UI", true));
   });
+
