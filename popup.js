@@ -10,10 +10,10 @@ const STORAGE_KEYS = [
 
 const capsuleList = document.getElementById("capsuleList");
 const generatedCapsules = document.getElementById("generatedCapsules");
-const exportButton = document.getElementById("exportBtn");
-const generateButton = document.getElementById("generateCapsuleBtn");
-const statusElement = document.getElementById("status");
 
+const statusElement = document.getElementById("status");
+let visibleChats = 3;
+let visibleCapsules = 3;
 function storageGet(keys) {
   return new Promise((resolve, reject) => {
     chrome.storage.local.get(keys, (result) => {
@@ -143,15 +143,65 @@ async function requestActiveChatCapture() {
   }
 }
 
-async function selectConversation(id) {
+async function renderCurrentChat() {
   const storage = await getStorage();
 
-  if (!storage.capsules[id]) {
-    throw new Error("Selected conversation no longer exists.");
+  const currentId =
+    storage.currentConversationId || storage.selectedConversationId;
+
+  const container = document.getElementById("currentChat");
+
+  container.innerHTML = "";
+
+  if (!currentId) {
+    container.innerHTML = "<p>No active chat.</p>";
+    return;
   }
 
-  await storageSet({ selectedConversationId: id });
-  await renderCapsules();
+  const capsule = storage.capsules[currentId];
+
+  if (!capsule) {
+    container.innerHTML = "<p>No active chat.</p>";
+    return;
+  }
+
+  const card = document.createElement("div");
+
+  card.className = "capsule";
+
+  card.innerHTML = `
+    <div class="title">
+      ${capsule.title}
+    </div>
+
+    <div class="meta">
+      ${capsule.messageCount} messages
+    </div>
+
+    <button id="generateCurrentCapsule">
+      Generate Capsule
+    </button>
+  `;
+
+  container.appendChild(card);
+
+  const button = document.getElementById("generateCurrentCapsule");
+
+  button.addEventListener("click", async () => {
+    try {
+      button.disabled = true;
+
+      setStatus("Generating Capsule...");
+
+      await generateSelectedAICapsule();
+
+      setStatus("Capsule Generated!");
+    } catch (error) {
+      setStatus(error.message, true);
+    } finally {
+      button.disabled = false;
+    }
+  });
 }
 
 async function renderCapsules() {
@@ -167,7 +217,11 @@ async function renderCapsules() {
     return;
   }
 
-  for (const [id, capsule] of entries) {
+  const recentChats = entries
+    .filter(([id]) => id !== storage.currentConversationId)
+    .slice(0, visibleChats);
+
+  for (const [id, capsule] of recentChats) {
     const item = document.createElement("button");
     const title = document.createElement("span");
     const meta = document.createElement("span");
@@ -187,12 +241,9 @@ async function renderCapsules() {
 
     item.append(title, meta);
     item.addEventListener("click", async () => {
-      try {
-        await selectConversation(id);
-        setStatus(`Selected: ${capsule.title || "Untitled Chat"}`);
-      } catch (error) {
-        setStatus(error.message, true);
-      }
+      const tab = await chrome.tabs.create({
+        url: `https://chatgpt.com/c/${id}`,
+      });
     });
 
     capsuleList.appendChild(item);
@@ -212,7 +263,7 @@ async function renderGeneratedCapsules() {
     return;
   }
 
-  for (const [id, capsule] of entries) {
+  for (const [id, capsule] of entries.slice(0, visibleCapsules)) {
     const item = document.createElement("div");
     const title = document.createElement("div");
     const meta = document.createElement("div");
@@ -227,13 +278,18 @@ async function renderGeneratedCapsules() {
     meta.textContent = `${capsule.keyTopics?.length || 0} topics`;
 
     item.append(title, meta);
+    item.addEventListener("click", () => {
+      chrome.tabs.create({
+        url: `viewer.html?id=${id}`,
+      });
+    });
     generatedCapsules.appendChild(item);
   }
 }
 
 async function exportSelectedConversation() {
   const storage = await getStorage();
-  const conversationId = storage.selectedConversationId;
+  const conversationId = storage.currentConversationId;
 
   if (!conversationId) {
     throw new Error("Select a chat before exporting.");
@@ -254,8 +310,7 @@ async function exportSelectedConversation() {
 
 async function generateSelectedAICapsule() {
   const storage = await getStorage();
-  const conversationId = storage.selectedConversationId;
-
+  const conversationId = storage.currentConversationId;
   if (!conversationId) {
     throw new Error("Select a chat before generating a capsule.");
   }
@@ -298,35 +353,18 @@ async function generateSelectedAICapsule() {
   await renderGeneratedCapsules();
 }
 
-exportButton.addEventListener("click", async () => {
-  try {
-    setStatus("Exporting selected chat...");
-    await exportSelectedConversation();
-    setStatus("Selected chat exported.");
-  } catch (error) {
-    setStatus(error.message || "Unable to export selected chat.", true);
-  }
-});
-
-generateButton.addEventListener("click", async () => {
-  try {
-    generateButton.disabled = true;
-    setStatus("Generating capsule...");
-    await generateSelectedAICapsule();
-    setStatus("AI capsule generated.");
-  } catch (error) {
-    setStatus(error.message || "Unable to generate AI capsule.", true);
-  } finally {
-    generateButton.disabled = false;
-  }
-});
-
 chrome.storage.onChanged.addListener((changes, areaName) => {
   if (areaName !== "local") {
     return;
   }
 
-  if (changes.capsules || changes.selectedConversationId) {
+  if (
+    changes.capsules ||
+    changes.selectedConversationId ||
+    changes.currentConversationId
+  ) {
+    renderCurrentChat().catch((error) => setStatus(error.message, true));
+
     renderCapsules().catch((error) => setStatus(error.message, true));
   }
 
@@ -338,7 +376,30 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
 requestActiveChatCapture()
   .catch(() => undefined)
   .finally(() =>
-    Promise.all([renderCapsules(), renderGeneratedCapsules()]).catch((error) =>
+    Promise.all([
+      renderCapsules(),
+      renderGeneratedCapsules(),
+      renderCurrentChat(),
+    ]).catch((error) =>
       setStatus(error.message || "Unable to load capsules.", true),
     ),
   );
+document
+  .getElementById("seeMoreChats")
+  .addEventListener("click", async () => {
+
+    visibleChats += 5;
+
+    await renderCapsules();
+
+  });
+
+document
+  .getElementById("seeMoreCapsules")
+  .addEventListener("click", async () => {
+
+    visibleCapsules += 5;
+
+    await renderGeneratedCapsules();
+
+  });
