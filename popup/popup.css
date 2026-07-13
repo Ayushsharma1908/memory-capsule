@@ -90,7 +90,18 @@ header {
 .logo {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
+}
+
+.main-logo {
+  width: 44px;
+  height: 44px;
+  filter: drop-shadow(0 4px 6px rgba(31, 36, 33, 0.15));
+  transition: transform var(--transition);
+}
+
+.main-logo:hover {
+  transform: scale(1.05);
 }
 
 h1, h2, h3 {

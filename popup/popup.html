@@ -1,86 +1,86 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Memory Capsule</title>
-    <!-- Fonts: DM Sans and Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <!-- Local Lucide Icons -->
-    <script src="../assets/lucide.min.js"></script>
-    <link rel="stylesheet" href="popup.css" />
-  </head>
 
-  <body>
-    <div id="toast" class="toast"></div>
+<head>
+  <meta charset="UTF-8" />
+  <title>Memory Capsule</title>
+  <!-- Fonts: DM Sans and Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;700&family=Inter:wght@400;500;600&display=swap"
+    rel="stylesheet">
+  <!-- Local Lucide Icons -->
+  <script src="../assets/lucide.min.js"></script>
+  <link rel="stylesheet" href="popup.css" />
+</head>
 
-    <div class="container">
-      <header>
-        <div class="logo">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="2" y="4" width="20" height="16" rx="6" fill="#1F2421" />
-            <path d="M12 9V15M9 12H15" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-          <h1>Memory Capsule</h1>
-        </div>
-        <button class="icon-button" aria-label="Settings">
-          <i data-lucide="settings"></i>
-        </button>
-      </header>
+<body>
+  <div id="toast" class="toast"></div>
 
-      <!-- Current Chat -->
-      <section id="currentChatSection">
-        <div class="section-header">
-          <div class="icon-wrapper green">
-            <i data-lucide="message-square"></i>
-          </div>
-          <div class="header-text">
-            <h2>Current Chat</h2>
-            <p>Active conversation</p>
-          </div>
-        </div>
-        <div id="currentChat">
-          <!-- Handled dynamically by JS -->
-        </div>
-      </section>
+  <div class="container">
+    <header>
+      <div class="logo">
+        <img src="../assets/icon-128.png" alt="Memory Capsule" class="main-logo" />
+        <h1>Memory Capsule</h1>
+      </div>
+      <button class="icon-button" aria-label="Settings">
+        <i data-lucide="settings"></i>
+      </button>
+    </header>
 
-      <!-- Recent Chats -->
-      <section>
-        <div class="section-header">
-          <div class="icon-wrapper blue">
-            <i data-lucide="clock"></i>
-          </div>
-          <div class="header-text">
-            <h2>Recent Chats</h2>
-            <p>Previously captured</p>
-          </div>
+    <!-- Current Chat -->
+    <section id="currentChatSection">
+      <div class="section-header">
+        <div class="icon-wrapper green">
+          <i data-lucide="message-square"></i>
         </div>
-        <div id="capsuleList"></div>
-        <button id="seeMoreChats" class="see-more" style="display: none;">
-          <span class="see-more-text">See More</span> <i data-lucide="chevron-down" class="see-more-icon"></i>
-        </button>
-      </section>
+        <div class="header-text">
+          <h2>Current Chat</h2>
+          <p>Active conversation</p>
+        </div>
+      </div>
+      <div id="currentChat">
+        <!-- Handled dynamically by JS -->
+      </div>
+    </section>
 
-      <!-- Generated Capsules -->
-      <section>
-        <div class="section-header">
-          <div class="icon-wrapper purple">
-            <i data-lucide="brain"></i>
-          </div>
-          <div class="header-text">
-            <h2>Generated Capsules</h2>
-            <p>AI-generated summaries</p>
-          </div>
+    <!-- Recent Chats -->
+    <section>
+      <div class="section-header">
+        <div class="icon-wrapper blue">
+          <i data-lucide="clock"></i>
         </div>
-        <div id="generatedCapsules"></div>
-        <button id="seeMoreCapsules" class="see-more" style="display: none;">
-          <span class="see-more-text">See More</span> <i data-lucide="chevron-down" class="see-more-icon"></i>
-        </button>
-      </section>
-      
-    </div>
-    
-    <script type="module" src="popup.js"></script>
-  </body>
+        <div class="header-text">
+          <h2>Recent Chats</h2>
+          <p>Previously captured</p>
+        </div>
+      </div>
+      <div id="capsuleList"></div>
+      <button id="seeMoreChats" class="see-more" style="display: none;">
+        <span class="see-more-text">See More</span> <i data-lucide="chevron-down" class="see-more-icon"></i>
+      </button>
+    </section>
+
+    <!-- Generated Capsules -->
+    <section>
+      <div class="section-header">
+        <div class="icon-wrapper purple">
+          <i data-lucide="brain"></i>
+        </div>
+        <div class="header-text">
+          <h2>Generated Capsules</h2>
+          <p>AI-generated summaries</p>
+        </div>
+      </div>
+      <div id="generatedCapsules"></div>
+      <button id="seeMoreCapsules" class="see-more" style="display: none;">
+        <span class="see-more-text">See More</span> <i data-lucide="chevron-down" class="see-more-icon"></i>
+      </button>
+    </section>
+
+  </div>
+
+  <script type="module" src="popup.js"></script>
+</body>
+
 </html>
