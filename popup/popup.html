@@ -4,79 +4,86 @@
 <head>
   <meta charset="UTF-8" />
   <title>Memory Capsule</title>
-  <!-- Fonts: DM Sans and Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;700&family=Inter:wght@400;500;600&display=swap"
-    rel="stylesheet">
-  <!-- Local Lucide Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="../assets/lucide.min.js"></script>
   <link rel="stylesheet" href="popup.css" />
 </head>
 
 <body>
+
   <div id="toast" class="toast"></div>
 
-  <div class="container">
-    <header>
-      <div class="logo">
-        <img src="../assets/icon-128.png" alt="Memory Capsule" class="main-logo" />
-        <h1>Memory Capsule</h1>
+  <div class="app">
+
+    <!-- Header -->
+    <header class="app-header">
+      <div class="app-header-left">
+        <img src="../assets/icon-128.png" alt="" class="app-icon" />
+        <span class="app-title">Memory Capsule</span>
       </div>
-      <button class="icon-button" aria-label="Settings">
+      <button class="btn-icon" aria-label="Settings">
         <i data-lucide="settings"></i>
       </button>
     </header>
 
-    <!-- Current Chat -->
-    <section id="currentChatSection">
-      <div class="section-header">
-        <div class="icon-wrapper green">
+    <!-- Search (optional — add later if needed) -->
+    <!-- <div class="search-bar">
+      <i data-lucide="search"></i>
+      <input type="text" placeholder="Search capsules..." />
+    </div> -->
+
+    <!-- Scrollable Content -->
+    <main class="app-body">
+
+      <!-- Current Chat -->
+      <section class="section" id="currentChatSection">
+        <div class="section-label">
           <i data-lucide="message-square"></i>
+          <span>Current Chat</span>
         </div>
-        <div class="header-text">
-          <h2>Current Chat</h2>
-          <p>Active conversation</p>
-        </div>
-      </div>
-      <div id="currentChat">
-        <!-- Handled dynamically by JS -->
-      </div>
-    </section>
+        <div id="currentChat" class="section-content"></div>
+      </section>
 
-    <!-- Recent Chats -->
-    <section>
-      <div class="section-header">
-        <div class="icon-wrapper blue">
+      <!-- Divider -->
+      <hr class="divider" />
+
+      <!-- Recent Chats -->
+      <section class="section">
+        <div class="section-label">
           <i data-lucide="clock"></i>
+          <span>Recent Chats</span>
         </div>
-        <div class="header-text">
-          <h2>Recent Chats</h2>
-          <p>Previously captured</p>
-        </div>
-      </div>
-      <div id="capsuleList"></div>
-      <button id="seeMoreChats" class="see-more" style="display: none;">
-        <span class="see-more-text">See More</span> <i data-lucide="chevron-down" class="see-more-icon"></i>
-      </button>
-    </section>
+        <div id="capsuleList" class="section-content"></div>
+        <button id="seeMoreChats" class="btn-more" style="display: none;">
+          <span>Show more</span>
+          <i data-lucide="chevron-down"></i>
+        </button>
+      </section>
 
-    <!-- Generated Capsules -->
-    <section>
-      <div class="section-header">
-        <div class="icon-wrapper purple">
+      <!-- Divider -->
+      <hr class="divider" />
+
+      <!-- Generated Capsules -->
+      <section class="section">
+        <div class="section-label">
           <i data-lucide="brain"></i>
+          <span>Generated Capsules</span>
         </div>
-        <div class="header-text">
-          <h2>Generated Capsules</h2>
-          <p>AI-generated summaries</p>
-        </div>
-      </div>
-      <div id="generatedCapsules"></div>
-      <button id="seeMoreCapsules" class="see-more" style="display: none;">
-        <span class="see-more-text">See More</span> <i data-lucide="chevron-down" class="see-more-icon"></i>
-      </button>
-    </section>
+        <div id="generatedCapsules" class="section-content"></div>
+        <button id="seeMoreCapsules" class="btn-more" style="display: none;">
+          <span>Show more</span>
+          <i data-lucide="chevron-down"></i>
+        </button>
+      </section>
+
+    </main>
+
+    <!-- Optional bottom bar -->
+    <!-- <footer class="app-footer">
+      <button class="btn-pill">View All</button>
+    </footer> -->
 
   </div>
 
