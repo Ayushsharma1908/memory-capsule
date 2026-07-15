@@ -145,9 +145,9 @@ async function renderCurrentChat() {
   if (!currentId || !storage.capsules[currentId]) {
     container.innerHTML = `
       <div class="empty-state">
-        <div class="emoji">🔍</div>
-        <h3>No active chat</h3>
-        <p>Open a ChatGPT conversation to get started.</p>
+        <div class="emoji">💬</div>
+        <h3>No active conversation</h3>
+        <p>Open ChatGPT to start capturing memories.</p>
       </div>`;
     return;
   }
@@ -156,6 +156,8 @@ async function renderCurrentChat() {
 
   const card = document.createElement("div");
   card.className = "capsule-card current-chat-card";
+  const updatedAt = formatDate(capsule.updatedAt);
+
   card.innerHTML = `
     <div class="card-title-row">
       <div class="card-title">${escapeHTML(capsule.title || "Untitled Chat")}</div>
@@ -164,6 +166,7 @@ async function renderCurrentChat() {
     <div class="card-meta">
       <i data-lucide="message-square"></i>
       ${capsule.messageCount || 0} messages
+      ${updatedAt ? `<span class="dot">·</span> ${updatedAt}` : ''}
     </div>
     <div class="action-buttons">
       <button id="generateCurrentCapsule" class="primary-button">
@@ -223,9 +226,9 @@ async function renderCapsules() {
   if (recentChats.length === 0) {
     capsuleList.innerHTML = `
       <div class="empty-state">
-        <div class="emoji">⏳</div>
-        <h3>No recent chats</h3>
-        <p>Your history will appear here.</p>
+        <div class="emoji">📋</div>
+        <h3>No recent conversations</h3>
+        <p>Your chat history will appear here automatically.</p>
       </div>`;
     seeMoreBtn.style.display = "none";
     return;
@@ -301,8 +304,8 @@ async function renderGeneratedCapsules() {
     container.innerHTML = `
       <div class="empty-state">
         <div class="emoji">🧠</div>
-        <h3>No Memory Capsules yet</h3>
-        <p>Generate your first AI memory.</p>
+        <h3>No capsules generated yet</h3>
+        <p>Use Generate Capsule to create your first AI memory.</p>
       </div>`;
     seeMoreBtn.style.display = "none";
     return;

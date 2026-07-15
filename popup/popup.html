@@ -6,7 +6,7 @@
   <title>Memory Capsule</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
   <script src="../assets/lucide.min.js"></script>
   <link rel="stylesheet" href="popup.css" />
 </head>
@@ -17,10 +17,9 @@
 
   <div class="app">
 
-    <!-- Header -->
     <header class="app-header">
       <div class="app-header-left">
-        <img src="../assets/icon-128.png" alt="" class="app-icon" />
+        <img src="../assets/icon-128.png" alt="" class="app-logo" />
         <span class="app-title">Memory Capsule</span>
       </div>
       <button class="btn-icon" aria-label="Settings">
@@ -28,50 +27,28 @@
       </button>
     </header>
 
-    <!-- Search (optional — add later if needed) -->
-    <!-- <div class="search-bar">
-      <i data-lucide="search"></i>
-      <input type="text" placeholder="Search capsules..." />
-    </div> -->
-
-    <!-- Scrollable Content -->
     <main class="app-body">
 
       <!-- Current Chat -->
       <section class="section" id="currentChatSection">
-        <div class="section-label">
-          <i data-lucide="message-square"></i>
-          <span>Current Chat</span>
-        </div>
-        <div id="currentChat" class="section-content"></div>
+        <p class="section-label">Current Chat</p>
+        <div id="currentChat"></div>
       </section>
-
-      <!-- Divider -->
-      <hr class="divider" />
 
       <!-- Recent Chats -->
       <section class="section">
-        <div class="section-label">
-          <i data-lucide="clock"></i>
-          <span>Recent Chats</span>
-        </div>
-        <div id="capsuleList" class="section-content"></div>
+        <p class="section-label">Recent Chats</p>
+        <div id="capsuleList"></div>
         <button id="seeMoreChats" class="btn-more" style="display: none;">
           <span>Show more</span>
           <i data-lucide="chevron-down"></i>
         </button>
       </section>
 
-      <!-- Divider -->
-      <hr class="divider" />
-
       <!-- Generated Capsules -->
       <section class="section">
-        <div class="section-label">
-          <i data-lucide="brain"></i>
-          <span>Generated Capsules</span>
-        </div>
-        <div id="generatedCapsules" class="section-content"></div>
+        <p class="section-label">Generated Capsules</p>
+        <div id="generatedCapsules"></div>
         <button id="seeMoreCapsules" class="btn-more" style="display: none;">
           <span>Show more</span>
           <i data-lucide="chevron-down"></i>
@@ -79,11 +56,6 @@
       </section>
 
     </main>
-
-    <!-- Optional bottom bar -->
-    <!-- <footer class="app-footer">
-      <button class="btn-pill">View All</button>
-    </footer> -->
 
   </div>
 
