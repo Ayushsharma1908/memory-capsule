@@ -1,6 +1,3 @@
-// ========================================================
-// UTILS
-// ========================================================
 
 function escapeHTML(str) {
   if (typeof str !== "string") return "";
@@ -32,9 +29,6 @@ function updateIcons() {
   if (window.lucide) window.lucide.createIcons();
 }
 
-// ========================================================
-// TOAST
-// ========================================================
 
 let toastTimeout = null;
 
@@ -57,10 +51,6 @@ function setStatus(message, isError = false) {
   }, isError ? 5000 : 3000);
 }
 
-// ========================================================
-// STORAGE
-// ========================================================
-
 function storageGet(keys) {
   return new Promise((resolve, reject) => {
     chrome.storage.local.get(keys, (result) => {
@@ -79,12 +69,11 @@ async function getCapsule(id) {
   return aiCapsules[id] || null;
 }
 
-// ========================================================
-// RENDERING
-// ========================================================
 
 function renderCapsule(capsule) {
-  // ---- Hero Header ----
+  document.getElementById("topics").innerHTML = "";
+  document.getElementById("insights").innerHTML = "";
+  document.getElementById("conversation").innerHTML = "";
   document.getElementById("title").textContent = capsule.title || "Untitled Capsule";
 
   const summaryEl = document.getElementById("summary");
@@ -102,30 +91,32 @@ function renderCapsule(capsule) {
   const updatedAt = capsule.updatedAt ? formatDateFull(capsule.updatedAt) : "";
 
   metadataEl.innerHTML = `
-    <span class="meta-item">
-      <i data-lucide="message-square"></i>
-      ${msgCount} messages
-    </span>
-    ${updatedAt ? `
-      <span class="meta-sep"></span>
-      <span class="meta-item">
+    <div class="meta-pill">
+        <i data-lucide="message-square"></i>
+        <span>${msgCount} ${msgCount === 1 ? "message" : "messages"}</span>
+    </div>
+    ${updatedAt
+      ? `
+    <div class="meta-pill">
         <i data-lucide="clock"></i>
-        ${escapeHTML(updatedAt)}
-      </span>
-    ` : ""}
-    ${capsule.keyTopics?.length ? `
-      <span class="meta-sep"></span>
-      <span class="meta-item">
+        <span>${escapeHTML(updatedAt)}</span>
+    </div>`
+      : ""
+    }
+    ${capsule.keyTopics?.length
+      ? `
+    <div class="meta-pill">
         <i data-lucide="tag"></i>
-        ${capsule.keyTopics.length} topics
-      </span>
-    ` : ""}
-  `;
+        <span>${capsule.keyTopics.length} ${capsule.keyTopics.length === 1 ? "topic" : "topics"}</span>
+    </div>`
+      : ""
+    }
+`;
 
   // ---- Download Button ----
   const downloadBtn = document.getElementById("downloadBtn");
   downloadBtn.style.display = "inline-flex";
-  downloadBtn.addEventListener("click", () => {
+  downloadBtn.onclick = () => {
     try {
       const safeName = capsule.title
         ? capsule.title.replace(/[^a-z0-9]+/gi, "_").toLowerCase()
@@ -141,7 +132,7 @@ function renderCapsule(capsule) {
     } catch (error) {
       setStatus(error.message, true);
     }
-  });
+  };
 
   // ---- Topics ----
   if (Array.isArray(capsule.keyTopics) && capsule.keyTopics.length > 0) {
@@ -185,8 +176,12 @@ function renderCapsule(capsule) {
 
       const roleEl = document.createElement("div");
       roleEl.className = "role";
-      roleEl.textContent = msg.role === "user" ? "You" : "Assistant";
-
+      roleEl.textContent =
+        msg.role === "user"
+          ?
+          "You"
+          :
+          "ChatGPT";
       const contentEl = document.createElement("div");
       contentEl.className = "content";
       contentEl.textContent = msg.content;
@@ -199,10 +194,6 @@ function renderCapsule(capsule) {
 
   updateIcons();
 }
-
-// ========================================================
-// THEME MANAGEMENT
-// ========================================================
 
 function applyTheme(theme) {
   document.documentElement.setAttribute("data-theme", theme || "light");
@@ -223,9 +214,6 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
   }
 });
 
-// ========================================================
-// INITIALIZATION
-// ========================================================
 
 document.addEventListener("DOMContentLoaded", async () => {
   // Load theme first for instant appearance

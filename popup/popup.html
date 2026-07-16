@@ -14,7 +14,7 @@
 </head>
 
 <body>
-  <div id="toast" class="toast"></div>
+  <div id="toast" class="toast" aria-live="polite"></div>
 
   <!-- Settings Panel -->
   <div id="settingsOverlay" class="settings-overlay">
@@ -43,28 +43,39 @@
 
   <div class="app">
     <header class="app-header">
-      <div class="app-header-left">
-        <img src="../assets/icon-128.png" alt="" class="app-logo" />
-        <span class="app-title">Memory Capsule</span>
+      <div class="app-brand">
+        <img src="../assets/icon-128.png" alt="Memory Capsule logo" class="app-logo" />
+        <h1 class="app-title">Memory Capsule</h1>
+        <span class="app-subtitle">
+          Capture your AI memories
+        </span>
       </div>
-      <button class="btn-icon" aria-label="Settings">
+      <button class="btn-icon" aria-label="Settings" id="settingsButton">
         <i data-lucide="settings"></i>
       </button>
     </header>
-    <main class="app-body">
+    <main class="app-body" id="popupMain">
 
       <!-- Current Chat -->
       <section class="section" id="currentChatSection">
-        <p class="section-label">Current Chat</p>
-        <div id="currentChat"></div>
+        <div class="section-header">
+          <h2 class="section-label">
+            Current Chat
+          </h2>
+        </div>
+        <div id="currentChat" role="list">
+          <div class="loading-placeholder">
+          </div>
+        </div>
       </section>
 
       <!-- Recent Chats -->
       <section class="section">
-        <p class="section-label">Recent Chats</p>
+        <h2 class="section-label">Recent Chats</h2>
+        <p class="section-description">Previously captured conversations</p>
         <div id="capsuleList"></div>
-        <button id="seeMoreChats" class="btn-more" style="display: none;">
-          <span>Show more</span>
+        <button id="seeMoreChats" class="btn-more hidden">
+          <span class="btn-more-text">Show more</span>
           <i data-lucide="chevron-down"></i>
         </button>
       </section>
