@@ -6,17 +6,42 @@
   <title>Memory Capsule</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap"
+    rel="stylesheet">
   <script src="../assets/lucide.min.js"></script>
   <link rel="stylesheet" href="popup.css" />
 </head>
 
 <body>
-
   <div id="toast" class="toast"></div>
 
-  <div class="app">
+  <!-- Settings Panel -->
+  <div id="settingsOverlay" class="settings-overlay">
+    <div class="settings-header">
+      <button id="settingsBack" class="settings-back" aria-label="Back">
+        <i data-lucide="arrow-left"></i>
+      </button>
+      <span class="settings-title">Settings</span>
+    </div>
+    <div class="settings-body">
+      <div class="settings-group">
+        <p class="settings-group-label">Appearance</p>
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-label">Dark Mode</span>
+            <span class="setting-desc">Switch to a darker color scheme</span>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="darkModeToggle" />
+            <span class="toggle-track"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
 
+  <div class="app">
     <header class="app-header">
       <div class="app-header-left">
         <img src="../assets/icon-128.png" alt="" class="app-logo" />
@@ -26,7 +51,6 @@
         <i data-lucide="settings"></i>
       </button>
     </header>
-
     <main class="app-body">
 
       <!-- Current Chat -->
@@ -54,11 +78,8 @@
           <i data-lucide="chevron-down"></i>
         </button>
       </section>
-
     </main>
-
   </div>
-
   <script type="module" src="popup.js"></script>
 </body>
 

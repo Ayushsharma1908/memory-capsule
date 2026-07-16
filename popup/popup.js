@@ -5,7 +5,7 @@ import { generateAICapsule } from "../ai/aigenerator.js";
 // CONSTANTS
 // ========================================================
 
-const STORAGE_KEYS = ["capsules", "currentConversationId", "aiCapsules"];
+const STORAGE_KEYS = ["capsules", "currentConversationId", "aiCapsules", "theme"];
 const DEFAULT_VISIBLE = 3;
 const TOAST_DURATION = 3000;
 const TOAST_DURATION_ERROR = 5000;
@@ -17,6 +17,7 @@ const TOAST_DURATION_ERROR = 5000;
 let isChatsExpanded = false;
 let isCapsulesExpanded = false;
 let toastTimeout = null;
+let currentTheme = "light";
 
 // ========================================================
 // UTILS
@@ -170,7 +171,7 @@ async function renderCurrentChat() {
     </div>
     <div class="action-buttons">
       <button id="generateCurrentCapsule" class="primary-button">
-        <i data-lucide="sparkles"></i> Generate Capsule
+        <i data-lucide="wand-2"></i> Generate Capsule
       </button>
       <button id="exportCurrentChat" class="secondary-button">
         <i data-lucide="download"></i> Export
@@ -328,7 +329,7 @@ async function renderGeneratedCapsules() {
         <div>
           <div class="card-title">${escapeHTML(capsule.title || "Untitled Capsule")}</div>
           <div class="card-meta">
-            <span class="ai-badge"><i data-lucide="sparkles"></i> AI</span>
+            <span class="ai-badge"><i data-lucide="brain"></i> AI</span>
             <span class="dot">·</span>
             ${capsule.keyTopics?.length || 0} topics
             <span class="dot">·</span>
@@ -460,9 +461,54 @@ document.getElementById("seeMoreCapsules").addEventListener("click", () => {
   renderGeneratedCapsules();
 });
 
-// Settings button placeholder
+// ========================================================
+// THEME MANAGEMENT
+// ========================================================
+
+function applyTheme(theme) {
+  currentTheme = theme || "light";
+  document.documentElement.setAttribute("data-theme", currentTheme);
+  const toggle = document.getElementById("darkModeToggle");
+  if (toggle) toggle.checked = currentTheme === "dark";
+}
+
+async function loadTheme() {
+  try {
+    const result = await storageGet(["theme"]);
+    applyTheme(result.theme || "light");
+  } catch (_) {
+    applyTheme("light");
+  }
+}
+
+async function setTheme(theme) {
+  applyTheme(theme);
+  await storageSet({ theme });
+}
+
+// ========================================================
+// SETTINGS PANEL
+// ========================================================
+
+const settingsOverlay = document.getElementById("settingsOverlay");
+const settingsBackBtn = document.getElementById("settingsBack");
+const darkModeToggle = document.getElementById("darkModeToggle");
+
+// Open settings
 document.querySelector(".btn-icon[aria-label='Settings']")?.addEventListener("click", () => {
-  setStatus("Settings coming soon");
+  settingsOverlay.classList.add("open");
+  updateIcons();
+});
+
+// Close settings
+settingsBackBtn?.addEventListener("click", () => {
+  settingsOverlay.classList.remove("open");
+});
+
+// Dark mode toggle
+darkModeToggle?.addEventListener("change", (e) => {
+  const newTheme = e.target.checked ? "dark" : "light";
+  setTheme(newTheme).catch((err) => setStatus(err.message, true));
 });
 
 chrome.storage.onChanged.addListener((changes, areaName) => {
@@ -476,6 +522,10 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
   if (changes.aiCapsules) {
     renderGeneratedCapsules().catch((e) => setStatus(e.message, true));
   }
+
+  if (changes.theme) {
+    applyTheme(changes.theme.newValue);
+  }
 });
 
 // ========================================================
@@ -484,10 +534,13 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
 
 updateIcons();
 
-requestActiveChatCapture()
-  .catch(() => undefined)
-  .finally(() => {
-    Promise.all([renderCurrentChat(), renderCapsules(), renderGeneratedCapsules()]).catch(
-      (error) => setStatus(error.message || "Failed to load UI", true)
-    );
-  });
+// Load theme first (sync appearance before content renders)
+loadTheme().then(() => {
+  requestActiveChatCapture()
+    .catch(() => undefined)
+    .finally(() => {
+      Promise.all([renderCurrentChat(), renderCapsules(), renderGeneratedCapsules()]).catch(
+        (error) => setStatus(error.message || "Failed to load UI", true)
+      );
+    });
+});
