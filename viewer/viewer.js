@@ -201,10 +201,36 @@ function renderCapsule(capsule) {
 }
 
 // ========================================================
+// THEME MANAGEMENT
+// ========================================================
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute("data-theme", theme || "light");
+}
+
+async function loadTheme() {
+  try {
+    const result = await storageGet(["theme"]);
+    applyTheme(result.theme || "light");
+  } catch (_) {
+    applyTheme("light");
+  }
+}
+
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName === "local" && changes.theme) {
+    applyTheme(changes.theme.newValue);
+  }
+});
+
+// ========================================================
 // INITIALIZATION
 // ========================================================
 
 document.addEventListener("DOMContentLoaded", async () => {
+  // Load theme first for instant appearance
+  await loadTheme();
+
   const urlParams = new URLSearchParams(window.location.search);
   const capsuleId = urlParams.get("id");
 
