@@ -44,8 +44,10 @@
   <div class="app">
     <header class="app-header">
       <div class="app-brand">
-        <img src="../assets/icon-128.png" alt="Memory Capsule logo" class="app-logo" />
-        <h1 class="app-title">Memory Capsule</h1>
+        <div class="app-title-row">
+          <img src="../assets/icon-128.png" alt="Memory Capsule logo" class="app-logo" />
+          <h1 class="app-title">Memory Capsule</h1>
+        </div>
         <span class="app-subtitle">
           Capture your AI memories
         </span>
@@ -68,6 +70,12 @@
           </div>
         </div>
       </section>
+
+      <!-- Search -->
+      <div class="search-container section" id="searchSection">
+        <i data-lucide="search" class="search-icon"></i>
+        <input type="text" id="searchInput" placeholder="Search your memories..." class="search-input" autocomplete="off" spellcheck="false" />
+      </div>
 
       <!-- Recent Chats -->
       <section class="section">

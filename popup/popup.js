@@ -18,6 +18,7 @@ let isChatsExpanded = false;
 let isCapsulesExpanded = false;
 let toastTimeout = null;
 let currentTheme = "light";
+let searchQuery = "";
 
 // ========================================================
 // UTILS
@@ -133,6 +134,107 @@ function resetButton(btn) {
 }
 
 // ========================================================
+// SHARED RENDERING HELPERS
+// ========================================================
+
+function filterEntries(entries, isAi) {
+  if (!searchQuery) return entries;
+  const q = searchQuery.toLowerCase();
+  
+  return entries.filter(([id, c]) => {
+    let searchString = (c.title || "") + " " + (c.summary || "");
+    
+    if (isAi) {
+      const convStr = Array.isArray(c.conversation) ? c.conversation.map(m => m.content || m.text || "").join(" ") : "";
+      searchString += " " + (c.keyTopics || []).join(" ") + " " + convStr;
+    } else {
+      const messagesStr = Array.isArray(c.messages) ? c.messages.map(m => m.content || m.text || "").join(" ") : "";
+      searchString += " " + messagesStr;
+    }
+    
+    return searchString.toLowerCase().includes(q);
+  });
+}
+
+function renderCard(id, capsule, type, index) {
+  const item = document.createElement("div");
+  item.className = "capsule-card";
+  item.setAttribute("tabindex", "0");
+  item.setAttribute("role", "button");
+  item.style.animationDelay = `${index * 40}ms`;
+
+  const updatedAt = formatDate(capsule.updatedAt);
+  const title = escapeHTML(capsule.title || (type === "ai" ? "Untitled Capsule" : "Untitled Chat"));
+  
+  let previewHtml = "";
+  if (type !== "ai") {
+    const messages = Array.isArray(capsule.messages) ? capsule.messages : [];
+    const lastMsg = messages.length > 0 ? (messages[messages.length - 1].content || messages[messages.length - 1].text || "") : "";
+    const previewText = capsule.summary || lastMsg;
+    if (previewText) {
+      previewHtml = `<div class="card-preview">${escapeHTML(previewText)}</div>`;
+    }
+  }
+
+  let metaHtml = "";
+  if (type === "ai") {
+    metaHtml = `
+      <span class="ai-badge"><i data-lucide="brain"></i> AI</span>
+      <span class="dot">·</span>
+      ${capsule.keyTopics?.length || 0} topics
+      <span class="dot">·</span>
+      ${updatedAt}
+    `;
+  } else {
+    metaHtml = `
+      <i data-lucide="message-square"></i>
+      ${capsule.messageCount || 0} messages
+      <span class="dot">·</span>
+      ${updatedAt}
+    `;
+  }
+
+  item.innerHTML = `
+    <div class="card-title-row">
+      <div class="card-title">${title}</div>
+    </div>
+    ${previewHtml}
+    <div class="card-meta">
+      ${metaHtml}
+    </div>
+  `;
+
+  const url = type === "ai"
+    ? chrome.runtime.getURL(`viewer/viewer.html?id=${id}`)
+    : `https://chatgpt.com/c/${id}`;
+
+  const openUrl = () => chrome.tabs.create({ url });
+
+  item.addEventListener("click", openUrl);
+  item.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      openUrl();
+    }
+  });
+
+  return item;
+}
+
+function updateSeeMoreButton(btnId, isExpanded, totalCount) {
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+  
+  if (searchQuery || totalCount <= DEFAULT_VISIBLE) {
+    btn.style.display = "none";
+  } else {
+    btn.style.display = "flex";
+    btn.querySelector("span").textContent = isExpanded ? "Show less" : "Show more";
+    btn.classList.toggle("expanded", isExpanded);
+  }
+}
+
+// ========================================================
 // RENDERING — Current Chat
 // ========================================================
 
@@ -154,7 +256,6 @@ async function renderCurrentChat() {
   }
 
   const capsule = storage.capsules[currentId];
-
   const card = document.createElement("div");
   card.className = "capsule-card current-chat-card";
   const updatedAt = formatDate(capsule.updatedAt);
@@ -167,39 +268,22 @@ async function renderCurrentChat() {
     <div class="card-meta">
       <i data-lucide="message-square"></i>
       ${capsule.messageCount || 0} messages
-      ${updatedAt ? `<span class="dot">·</span> ${updatedAt}` : ''}
+      ${updatedAt ? `<span class="dot">·</span> ${updatedAt}` : ""}
     </div>
     <div class="action-buttons">
       <button id="generateCurrentCapsule" class="primary-button">
         <i data-lucide="wand-2"></i> Generate Capsule
       </button>
-      <button id="exportCurrentChat" class="secondary-button">
-        <i data-lucide="download"></i> Export
-      </button>
     </div>
   `;
   container.appendChild(card);
 
-  // Bind action buttons
   document.getElementById("generateCurrentCapsule").addEventListener("click", async (e) => {
     const btn = e.currentTarget;
     try {
       setButtonLoading(btn, "Generating…");
       await generateCurrentAICapsule();
       setStatus("Generated Successfully");
-    } catch (error) {
-      setStatus(error.message, true);
-    } finally {
-      if (document.body.contains(btn)) resetButton(btn);
-    }
-  });
-
-  document.getElementById("exportCurrentChat").addEventListener("click", async (e) => {
-    const btn = e.currentTarget;
-    try {
-      setButtonLoading(btn, "Exporting…");
-      await exportCurrentConversation();
-      setStatus("Exported");
     } catch (error) {
       setStatus(error.message, true);
     } finally {
@@ -216,75 +300,33 @@ async function renderCurrentChat() {
 
 async function renderCapsules() {
   const storage = await getStorage();
-  const entries = sortByUpdatedAt(Object.entries(storage.capsules));
+  let entries = sortByUpdatedAt(Object.entries(storage.capsules));
+  entries = entries.filter(([id]) => id !== storage.currentConversationId);
+  
+  entries = filterEntries(entries, false);
 
-  const capsuleList = document.getElementById("capsuleList");
-  capsuleList.textContent = "";
+  const container = document.getElementById("capsuleList");
+  container.textContent = "";
 
-  const recentChats = entries.filter(([id]) => id !== storage.currentConversationId);
-  const seeMoreBtn = document.getElementById("seeMoreChats");
-
-  if (recentChats.length === 0) {
-    capsuleList.innerHTML = `
+  if (entries.length === 0) {
+    container.innerHTML = `
       <div class="empty-state">
         <div class="emoji">📋</div>
         <h3>No recent conversations</h3>
         <p>Your chat history will appear here automatically.</p>
       </div>`;
-    seeMoreBtn.style.display = "none";
+    updateSeeMoreButton("seeMoreChats", isChatsExpanded, 0);
     return;
   }
 
-  const limit = isChatsExpanded ? recentChats.length : DEFAULT_VISIBLE;
-  const visible = recentChats.slice(0, limit);
+  const limit = searchQuery ? entries.length : (isChatsExpanded ? entries.length : DEFAULT_VISIBLE);
+  const visible = entries.slice(0, limit);
 
   visible.forEach(([id, capsule], index) => {
-    const item = document.createElement("div");
-    item.className = "capsule-card";
-    item.setAttribute("tabindex", "0");
-    item.setAttribute("role", "button");
-    item.style.animationDelay = `${index * 40}ms`;
-
-    const updatedAt = formatDate(capsule.updatedAt);
-
-    item.innerHTML = `
-      <div class="card-row">
-        <div>
-          <div class="card-title">${escapeHTML(capsule.title || "Untitled Chat")}</div>
-          <div class="card-meta">
-            <i data-lucide="message-square"></i>
-            ${capsule.messageCount || 0} messages
-            <span class="dot">·</span>
-            ${updatedAt}
-          </div>
-        </div>
-        <span class="card-chevron"><i data-lucide="chevron-right"></i></span>
-      </div>
-    `;
-
-    item.addEventListener("click", () => {
-      chrome.tabs.create({ url: `https://chatgpt.com/c/${id}` });
-    });
-
-    item.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        chrome.tabs.create({ url: `https://chatgpt.com/c/${id}` });
-      }
-    });
-
-    capsuleList.appendChild(item);
+    container.appendChild(renderCard(id, capsule, "recent", index));
   });
 
-  // Toggle see-more button
-  if (recentChats.length > DEFAULT_VISIBLE) {
-    seeMoreBtn.style.display = "flex";
-    seeMoreBtn.querySelector("span").textContent = isChatsExpanded ? "Show less" : "Show more";
-    seeMoreBtn.classList.toggle("expanded", isChatsExpanded);
-  } else {
-    seeMoreBtn.style.display = "none";
-  }
-
+  updateSeeMoreButton("seeMoreChats", isChatsExpanded, entries.length);
   updateIcons();
 }
 
@@ -294,12 +336,12 @@ async function renderCapsules() {
 
 async function renderGeneratedCapsules() {
   const storage = await getStorage();
-  const entries = sortByUpdatedAt(Object.entries(storage.aiCapsules));
+  let entries = sortByUpdatedAt(Object.entries(storage.aiCapsules));
+  
+  entries = filterEntries(entries, true);
 
   const container = document.getElementById("generatedCapsules");
   container.textContent = "";
-
-  const seeMoreBtn = document.getElementById("seeMoreCapsules");
 
   if (entries.length === 0) {
     container.innerHTML = `
@@ -308,64 +350,18 @@ async function renderGeneratedCapsules() {
         <h3>No capsules generated yet</h3>
         <p>Use Generate Capsule to create your first AI memory.</p>
       </div>`;
-    seeMoreBtn.style.display = "none";
+    updateSeeMoreButton("seeMoreCapsules", isCapsulesExpanded, 0);
     return;
   }
 
-  const limit = isCapsulesExpanded ? entries.length : DEFAULT_VISIBLE;
+  const limit = searchQuery ? entries.length : (isCapsulesExpanded ? entries.length : DEFAULT_VISIBLE);
   const visible = entries.slice(0, limit);
 
   visible.forEach(([id, capsule], index) => {
-    const item = document.createElement("div");
-    item.className = "capsule-card";
-    item.setAttribute("tabindex", "0");
-    item.setAttribute("role", "button");
-    item.style.animationDelay = `${index * 40}ms`;
-
-    const updatedAt = formatDate(capsule.updatedAt);
-
-    item.innerHTML = `
-      <div class="card-row">
-        <div>
-          <div class="card-title">${escapeHTML(capsule.title || "Untitled Capsule")}</div>
-          <div class="card-meta">
-            <span class="ai-badge"><i data-lucide="brain"></i> AI</span>
-            <span class="dot">·</span>
-            ${capsule.keyTopics?.length || 0} topics
-            <span class="dot">·</span>
-            ${updatedAt}
-          </div>
-        </div>
-        <span class="card-chevron"><i data-lucide="chevron-right"></i></span>
-      </div>
-    `;
-
-    item.addEventListener("click", () => {
-      chrome.tabs.create({
-        url: chrome.runtime.getURL(`viewer/viewer.html?id=${id}`),
-      });
-    });
-
-    item.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        chrome.tabs.create({
-          url: chrome.runtime.getURL(`viewer/viewer.html?id=${id}`),
-        });
-      }
-    });
-
-    container.appendChild(item);
+    container.appendChild(renderCard(id, capsule, "ai", index));
   });
 
-  if (entries.length > DEFAULT_VISIBLE) {
-    seeMoreBtn.style.display = "flex";
-    seeMoreBtn.querySelector("span").textContent = isCapsulesExpanded ? "Show less" : "Show more";
-    seeMoreBtn.classList.toggle("expanded", isCapsulesExpanded);
-  } else {
-    seeMoreBtn.style.display = "none";
-  }
-
+  updateSeeMoreButton("seeMoreCapsules", isCapsulesExpanded, entries.length);
   updateIcons();
 }
 
@@ -382,32 +378,8 @@ async function requestActiveChatCapture() {
 
     await chrome.tabs.sendMessage(tab.id, { type: "MEMORY_CAPSULE_CAPTURE_NOW" });
   } catch (_error) {
-    // Content script might not be injected — silently ignore
+    // Content script might not be injected
   }
-}
-
-function downloadJson(fileName, data) {
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = fileName;
-  link.click();
-  URL.revokeObjectURL(url);
-}
-
-async function exportCurrentConversation() {
-  const storage = await getStorage();
-  const conversationId = storage.currentConversationId;
-  if (!conversationId) throw new Error("No active chat to export.");
-
-  const capsule = storage.capsules[conversationId];
-  if (!capsule) throw new Error("Conversation data not found.");
-  if (!Array.isArray(capsule.messages) || capsule.messages.length === 0) {
-    throw new Error("Conversation has no messages.");
-  }
-
-  downloadJson("memory-capsule-export.json", generateCapsule(capsule));
 }
 
 async function generateCurrentAICapsule() {
@@ -533,6 +505,23 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
 // ========================================================
 
 updateIcons();
+
+const searchInput = document.getElementById("searchInput");
+if (searchInput) {
+  searchInput.addEventListener("input", (e) => {
+    searchQuery = e.target.value.trim();
+    
+    const currentChatSection = document.getElementById("currentChatSection");
+    if (searchQuery) {
+      currentChatSection.style.display = "none";
+    } else {
+      currentChatSection.style.display = "block";
+    }
+    
+    renderCapsules();
+    renderGeneratedCapsules();
+  });
+}
 
 // Load theme first (sync appearance before content renders)
 loadTheme().then(() => {
