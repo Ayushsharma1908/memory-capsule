@@ -137,13 +137,30 @@ function resetButton(btn) {
 // SHARED RENDERING HELPERS
 // ========================================================
 
+/**
+ * Extract a preview string from a capsule.
+ * For AI capsules: use summary.
+ * For recent chats: use summary or last message content.
+ */
+function getPreviewText(capsule, type) {
+  if (type === "ai") {
+    return capsule.summary || "";
+  }
+  // Recent chat — prefer summary, fallback to last message
+  if (capsule.summary) return capsule.summary;
+  const messages = Array.isArray(capsule.messages) ? capsule.messages : [];
+  if (messages.length === 0) return "";
+  const lastMsg = messages[messages.length - 1];
+  return lastMsg?.content || lastMsg?.text || "";
+}
+
 function filterEntries(entries, isAi) {
   if (!searchQuery) return entries;
   const q = searchQuery.toLowerCase();
-  
+
   return entries.filter(([id, c]) => {
     let searchString = (c.title || "") + " " + (c.summary || "");
-    
+
     if (isAi) {
       const convStr = Array.isArray(c.conversation) ? c.conversation.map(m => m.content || m.text || "").join(" ") : "";
       searchString += " " + (c.keyTopics || []).join(" ") + " " + convStr;
@@ -151,11 +168,15 @@ function filterEntries(entries, isAi) {
       const messagesStr = Array.isArray(c.messages) ? c.messages.map(m => m.content || m.text || "").join(" ") : "";
       searchString += " " + messagesStr;
     }
-    
+
     return searchString.toLowerCase().includes(q);
   });
 }
 
+/**
+ * Render a unified card component.
+ * Used for both Recent Chats and Generated Capsules.
+ */
 function renderCard(id, capsule, type, index) {
   const item = document.createElement("div");
   item.className = "capsule-card";
@@ -165,17 +186,14 @@ function renderCard(id, capsule, type, index) {
 
   const updatedAt = formatDate(capsule.updatedAt);
   const title = escapeHTML(capsule.title || (type === "ai" ? "Untitled Capsule" : "Untitled Chat"));
-  
-  let previewHtml = "";
-  if (type !== "ai") {
-    const messages = Array.isArray(capsule.messages) ? capsule.messages : [];
-    const lastMsg = messages.length > 0 ? (messages[messages.length - 1].content || messages[messages.length - 1].text || "") : "";
-    const previewText = capsule.summary || lastMsg;
-    if (previewText) {
-      previewHtml = `<div class="card-preview">${escapeHTML(previewText)}</div>`;
-    }
-  }
+  const preview = escapeHTML(getPreviewText(capsule, type));
 
+  // Build preview HTML
+  const previewHtml = preview
+    ? `<div class="card-preview">${preview}</div>`
+    : "";
+
+  // Build metadata HTML
   let metaHtml = "";
   if (type === "ai") {
     metaHtml = `
@@ -224,7 +242,7 @@ function renderCard(id, capsule, type, index) {
 function updateSeeMoreButton(btnId, isExpanded, totalCount) {
   const btn = document.getElementById(btnId);
   if (!btn) return;
-  
+
   if (searchQuery || totalCount <= DEFAULT_VISIBLE) {
     btn.style.display = "none";
   } else {
@@ -248,10 +266,11 @@ async function renderCurrentChat() {
   if (!currentId || !storage.capsules[currentId]) {
     container.innerHTML = `
       <div class="empty-state">
-        <div class="emoji">💬</div>
+        <div class="empty-icon"><i data-lucide="message-circle"></i></div>
         <h3>No active conversation</h3>
         <p>Open ChatGPT to start capturing memories.</p>
       </div>`;
+    updateIcons();
     return;
   }
 
@@ -302,7 +321,7 @@ async function renderCapsules() {
   const storage = await getStorage();
   let entries = sortByUpdatedAt(Object.entries(storage.capsules));
   entries = entries.filter(([id]) => id !== storage.currentConversationId);
-  
+
   entries = filterEntries(entries, false);
 
   const container = document.getElementById("capsuleList");
@@ -311,11 +330,12 @@ async function renderCapsules() {
   if (entries.length === 0) {
     container.innerHTML = `
       <div class="empty-state">
-        <div class="emoji">📋</div>
+        <div class="empty-icon"><i data-lucide="inbox"></i></div>
         <h3>No recent conversations</h3>
         <p>Your chat history will appear here automatically.</p>
       </div>`;
     updateSeeMoreButton("seeMoreChats", isChatsExpanded, 0);
+    updateIcons();
     return;
   }
 
@@ -337,7 +357,7 @@ async function renderCapsules() {
 async function renderGeneratedCapsules() {
   const storage = await getStorage();
   let entries = sortByUpdatedAt(Object.entries(storage.aiCapsules));
-  
+
   entries = filterEntries(entries, true);
 
   const container = document.getElementById("generatedCapsules");
@@ -346,11 +366,12 @@ async function renderGeneratedCapsules() {
   if (entries.length === 0) {
     container.innerHTML = `
       <div class="empty-state">
-        <div class="emoji">🧠</div>
+        <div class="empty-icon"><i data-lucide="sparkles"></i></div>
         <h3>No capsules generated yet</h3>
         <p>Use Generate Capsule to create your first AI memory.</p>
       </div>`;
     updateSeeMoreButton("seeMoreCapsules", isCapsulesExpanded, 0);
+    updateIcons();
     return;
   }
 
@@ -510,14 +531,14 @@ const searchInput = document.getElementById("searchInput");
 if (searchInput) {
   searchInput.addEventListener("input", (e) => {
     searchQuery = e.target.value.trim();
-    
+
     const currentChatSection = document.getElementById("currentChatSection");
     if (searchQuery) {
       currentChatSection.style.display = "none";
     } else {
       currentChatSection.style.display = "block";
     }
-    
+
     renderCapsules();
     renderGeneratedCapsules();
   });
