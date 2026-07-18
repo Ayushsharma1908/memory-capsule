@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Memory Capsule</title>
+  <meta name="description" content="Capture your AI conversations, generate knowledge capsules, and search memories." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -17,9 +18,9 @@
   <div id="toast" class="toast" aria-live="polite"></div>
 
   <!-- Settings Panel -->
-  <div id="settingsOverlay" class="settings-overlay">
+  <div id="settingsOverlay" class="settings-overlay" role="dialog" aria-label="Settings">
     <div class="settings-header">
-      <button id="settingsBack" class="settings-back" aria-label="Back">
+      <button id="settingsBack" class="settings-back" aria-label="Back to main view">
         <i data-lucide="arrow-left"></i>
       </button>
       <span class="settings-title">Settings</span>
@@ -32,7 +33,7 @@
             <span class="setting-label">Dark Mode</span>
             <span class="setting-desc">Switch to a darker color scheme</span>
           </div>
-          <label class="toggle">
+          <label class="toggle" aria-label="Toggle dark mode">
             <input type="checkbox" id="darkModeToggle" />
             <span class="toggle-track"></span>
           </label>
@@ -74,15 +75,14 @@
       <!-- Search -->
       <div class="search-container section" id="searchSection">
         <i data-lucide="search" class="search-icon"></i>
-        <input type="text" id="searchInput" placeholder="Search your memories..." class="search-input" autocomplete="off" spellcheck="false" />
+        <input type="text" id="searchInput" placeholder="Search conversations, topics, memories…" class="search-input" autocomplete="off" spellcheck="false" aria-label="Search conversations" />
       </div>
 
       <!-- Recent Chats -->
       <section class="section">
         <h2 class="section-label">Recent Chats</h2>
-        <p class="section-description">Previously captured conversations</p>
         <div id="capsuleList"></div>
-        <button id="seeMoreChats" class="btn-more hidden">
+        <button id="seeMoreChats" class="btn-more hidden" aria-label="Show more recent chats">
           <span class="btn-more-text">Show more</span>
           <i data-lucide="chevron-down"></i>
         </button>
@@ -92,7 +92,7 @@
       <section class="section">
         <p class="section-label">Generated Capsules</p>
         <div id="generatedCapsules"></div>
-        <button id="seeMoreCapsules" class="btn-more" style="display: none;">
+        <button id="seeMoreCapsules" class="btn-more" style="display: none;" aria-label="Show more capsules">
           <span>Show more</span>
           <i data-lucide="chevron-down"></i>
         </button>
