@@ -199,13 +199,13 @@ function renderCard(id, capsule, type, index) {
     metaHtml = `
       <span class="ai-badge"><i data-lucide="brain"></i> AI</span>
       <span class="dot">·</span>
-      ${capsule.keyTopics?.length || 0} topics
+      <i data-lucide="tag"></i> ${capsule.keyTopics?.length || 0} Topics
       <span class="dot">·</span>
       ${updatedAt}
     `;
   } else {
     metaHtml = `
-      <i data-lucide="message-square"></i>
+      <i data-lucide="message-circle"></i>
       ${capsule.messageCount || 0} messages
       <span class="dot">·</span>
       ${updatedAt}
@@ -285,7 +285,7 @@ async function renderCurrentChat() {
       <span class="current-badge">Current</span>
     </div>
     <div class="card-meta">
-      <i data-lucide="message-square"></i>
+      <i data-lucide="message-circle"></i>
       ${capsule.messageCount || 0} messages
       ${updatedAt ? `<span class="dot">·</span> ${updatedAt}` : ""}
     </div>
