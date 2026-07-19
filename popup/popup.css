@@ -276,13 +276,13 @@ button {
 .section:nth-child(3) { animation-delay: 80ms; }
 
 .section + .section {
-  margin-top: var(--space-3);
-  padding-top: var(--space-3);
-  border-top: 1px solid rgba(0, 0, 0, 0.04);
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 [data-theme="dark"] .section + .section {
-  border-top-color: rgba(255, 255, 255, 0.05);
+  border-top-color: rgba(255, 255, 255, 0.06);
 }
 
 .section-header {
@@ -353,15 +353,6 @@ button {
 
 .current-chat-card {
   cursor: default;
-  background: var(--card);
-  border: 1px solid var(--line);
-  box-shadow: var(--shadow-sm);
-}
-
-.current-chat-card:hover {
-  transform: none;
-  box-shadow: var(--shadow-sm);
-  border-color: var(--line);
 }
 
 
@@ -470,7 +461,7 @@ button {
 .action-buttons {
   display: flex;
   gap: var(--space-1);
-  margin-top: var(--space-1);
+  margin-top: 12px;
 }
 
 .primary-button,
@@ -635,6 +626,14 @@ button {
 
 /* ── Search (Spotlight-style) ────────────────────────────── */
 
+#searchSection {
+  padding-bottom: 16px;
+}
+#searchSection.section + .section {
+  margin-top: 16px;
+  padding-top: 16px;
+}
+
 .search-container {
   position: relative;
   display: flex;
@@ -643,7 +642,7 @@ button {
 
 .search-icon {
   position: absolute;
-  left: var(--space-2);
+  left: 12px;
   width: 16px;
   height: 16px;
   color: var(--ink-3);
@@ -658,7 +657,7 @@ button {
   border-radius: var(--r-card);
   border: 1px solid var(--line);
   background: var(--card);
-  padding: 0 var(--space-2) 0 44px;
+  padding: 0 12px 0 36px;
   font-family: var(--font-body);
   font-size: 13.5px;
   font-weight: 400;
@@ -671,7 +670,7 @@ button {
 .search-input:focus {
   outline: none;
   border-color: var(--beige);
-  box-shadow: 0 0 0 3px var(--beige-wash);
+  box-shadow: 0 0 0 2px var(--beige-wash);
   background: var(--card);
 }
 
