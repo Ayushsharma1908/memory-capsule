@@ -5,10 +5,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Memory Capsule Viewer</title>
+  <meta name="description" content="View and search AI conversation memory capsules with rich insights." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&family=Fira+Code:wght@400;500&display=swap"
     rel="stylesheet">
   <script src="../assets/lucide.min.js"></script>
   <link rel="stylesheet" href="viewer.css">
@@ -16,79 +17,122 @@
 
 <body>
   <div id="toast" class="toast" aria-live="polite"></div>
+
+  <!-- Top Navigation Bar -->
   <nav class="topbar">
     <div class="topbar-inner">
-      <a href="#" class="topbar-brand" id="backLink">
-        <i data-lucide="arrow-left" class="back-icon"></i>
-
-        <img src="../assets/icon-128.png" alt="Memory Capsule Logo" class="topbar-icon" />
-
-        <div class="brand-text">
-          <span class="brand-title">Memory Capsule</span>
-          <span class="brand-subtitle">Capsule Viewer</span>
-        </div>
-      </a>
-      <button id="downloadBtn" class="btn-sm" style="display: none;">
-        <i data-lucide="download"></i>
-        <span>Export JSON</span>
-      </button>
+      <div class="topbar-left">
+        <a href="#" class="topbar-brand" id="backLink" title="Memory Capsule">
+          <i data-lucide="arrow-left" class="back-icon"></i>
+          <img src="../assets/icon-128.png" alt="Memory Capsule Logo" class="topbar-icon" />
+          <div class="brand-text">
+            <span class="brand-title">Memory Capsule</span>
+            <span class="brand-subtitle">Capsule Viewer</span>
+          </div>
+        </a>
+      </div>
+      <div class="topbar-right">
+        <button id="themeToggleBtn" class="btn-icon-topbar" title="Toggle theme" aria-label="Toggle theme">
+          <i data-lucide="moon" id="themeIcon"></i>
+        </button>
+        <button id="copySummaryBtn" class="btn-sm secondary-btn" style="display: none;" title="Copy summary text">
+          <i data-lucide="copy"></i>
+          <span>Copy Text</span>
+        </button>
+        <button id="downloadBtn" class="btn-sm primary-btn" style="display: none;" title="Export JSON">
+          <i data-lucide="download"></i>
+          <span>Export JSON</span>
+        </button>
+      </div>
     </div>
   </nav>
 
+  <!-- Main Container -->
   <main class="page">
+    <!-- Hero Header Section -->
     <header class="hero" id="heroHeader">
-
-      <div class="hero-badge">
-        <i data-lucide="brain"></i>
-        <span>Memory Capsule</span>
+      <div class="hero-header-top">
+        <div class="hero-badge">
+          <i data-lucide="sparkles"></i>
+          <span>AI Memory Capsule</span>
+        </div>
       </div>
 
-      <h1 class="hero-title" id="title">
-        Loading Capsule...
-      </h1>
-
+      <h1 class="hero-title" id="title">Loading Capsule...</h1>
       <p class="hero-summary" id="summary"></p>
-
       <div class="hero-meta" id="metadata"></div>
-
     </header>
 
+    <!-- Key Topics Section -->
     <section class="section" id="topicsSection" style="display: none;">
-      <header class="section-header">
+      <div class="section-header">
         <div class="section-label">
           <i data-lucide="tag"></i>
           <span>Key Topics</span>
         </div>
-      </header>
+      </div>
       <div id="topics" class="topic-grid"></div>
     </section>
 
+    <!-- Key Insights Section -->
     <section class="section" id="insightsSection" style="display: none;">
-      <div class="section-label">
-        <i data-lucide="lightbulb"></i>
-        <span>Insights</span>
+      <div class="section-header">
+        <div class="section-label">
+          <i data-lucide="lightbulb"></i>
+          <span>Key Insights</span>
+        </div>
       </div>
       <div id="insights" class="insight-list"></div>
     </section>
 
+    <!-- Conversation Feed Section -->
     <section class="section" id="conversationSection" style="display: none;">
-      <div class="section-label">
-        <i data-lucide="message-circle"></i>
-        <span>Conversation Timeline</span>
+      <div class="section-header conversation-header">
+        <div class="section-label">
+          <i data-lucide="message-square"></i>
+          <span>Conversation Timeline</span>
+          <span class="count-badge" id="messageCountBadge">0</span>
+        </div>
+        
+        <!-- Interactive Controls: Search & Role Filters -->
+        <div class="chat-controls">
+          <div class="search-box">
+            <i data-lucide="search" class="search-icon"></i>
+            <input type="text" id="chatSearchInput" placeholder="Filter messages..." autocomplete="off" spellcheck="false" aria-label="Filter conversation messages" />
+            <button id="clearChatSearch" class="clear-search-btn" style="display: none;" title="Clear search">
+              <i data-lucide="x"></i>
+            </button>
+          </div>
+          <div class="filter-pills">
+            <button class="filter-pill active" data-role="all">All</button>
+            <button class="filter-pill" data-role="user">You</button>
+            <button class="filter-pill" data-role="assistant">ChatGPT</button>
+          </div>
+        </div>
       </div>
+
       <div id="conversation" class="conversation-feed"></div>
+      <div id="noResults" class="no-results" style="display: none;">
+        <i data-lucide="search-x"></i>
+        <p>No messages match your search filter.</p>
+      </div>
     </section>
 
+    <!-- Footer -->
     <footer class="page-footer">
-      <span class="footer-text">
-        Generated by Memory Capsule
-      </span>
-      <span class="footer-version">
-        v1.0
-      </span>
+      <div class="footer-content">
+        <img src="../assets/icon-128.png" alt="Logo" class="footer-logo" />
+        <span class="footer-text">Generated by Memory Capsule</span>
+        <span class="footer-dot">·</span>
+        <span class="footer-version">v1.0</span>
+      </div>
     </footer>
-
   </main>
+
+  <!-- Back to Top Button -->
+  <button id="backToTop" class="back-to-top" title="Scroll to top" aria-label="Scroll to top">
+    <i data-lucide="arrow-up"></i>
+  </button>
 
   <script src="viewer.js"></script>
 </body>
