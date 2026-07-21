@@ -6,6 +6,8 @@ import { generateAICapsule } from "../ai/aigenerator.js";
 // ========================================================
 
 const STORAGE_KEYS = ["capsules", "currentConversationId", "aiCapsules", "theme"];
+const INITIAL_CHAT_COUNT = 3;
+const CHAT_INCREMENT = 3;
 const DEFAULT_VISIBLE = 3;
 const TOAST_DURATION = 3000;
 const TOAST_DURATION_ERROR = 5000;
@@ -14,7 +16,7 @@ const TOAST_DURATION_ERROR = 5000;
 // STATE
 // ========================================================
 
-let isChatsExpanded = false;
+let visibleChatsLimit = INITIAL_CHAT_COUNT;
 let isCapsulesExpanded = false;
 let toastTimeout = null;
 let currentTheme = "light";
@@ -133,15 +135,7 @@ function resetButton(btn) {
   updateIcons();
 }
 
-// ========================================================
-// SHARED RENDERING HELPERS
-// ========================================================
 
-/**
- * Extract a preview string from a capsule.
- * For AI capsules: use summary.
- * For recent chats: use summary or last message content.
- */
 function getPreviewText(capsule, type) {
   if (type === "ai") {
     return capsule.summary || "";
@@ -252,6 +246,21 @@ function updateSeeMoreButton(btnId, isExpanded, totalCount) {
   }
 }
 
+function updateChatsSeeMoreButton(totalCount) {
+  const btn = document.getElementById("seeMoreChats");
+  if (!btn) return;
+
+  if (searchQuery || visibleChatsLimit >= totalCount) {
+    btn.classList.add("hidden");
+    btn.style.display = "none";
+  } else {
+    btn.classList.remove("hidden");
+    btn.style.display = "flex";
+    const span = btn.querySelector("span");
+    if (span) span.textContent = "See more";
+  }
+}
+
 // ========================================================
 // RENDERING — Current Chat
 // ========================================================
@@ -334,19 +343,19 @@ async function renderCapsules() {
         <h3>No recent conversations</h3>
         <p>Your chat history will appear here automatically.</p>
       </div>`;
-    updateSeeMoreButton("seeMoreChats", isChatsExpanded, 0);
+    updateChatsSeeMoreButton(0);
     updateIcons();
     return;
   }
 
-  const limit = searchQuery ? entries.length : (isChatsExpanded ? entries.length : DEFAULT_VISIBLE);
+  const limit = searchQuery ? entries.length : visibleChatsLimit;
   const visible = entries.slice(0, limit);
 
   visible.forEach(([id, capsule], index) => {
     container.appendChild(renderCard(id, capsule, "recent", index));
   });
 
-  updateSeeMoreButton("seeMoreChats", isChatsExpanded, entries.length);
+  updateChatsSeeMoreButton(entries.length);
   updateIcons();
 }
 
@@ -445,7 +454,7 @@ async function generateCurrentAICapsule() {
 // ========================================================
 
 document.getElementById("seeMoreChats").addEventListener("click", () => {
-  isChatsExpanded = !isChatsExpanded;
+  visibleChatsLimit += CHAT_INCREMENT;
   renderCapsules();
 });
 
@@ -531,6 +540,7 @@ const searchInput = document.getElementById("searchInput");
 if (searchInput) {
   searchInput.addEventListener("input", (e) => {
     searchQuery = e.target.value.trim();
+    visibleChatsLimit = INITIAL_CHAT_COUNT;
 
     const currentChatSection = document.getElementById("currentChatSection");
     if (searchQuery) {
