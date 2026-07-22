@@ -252,10 +252,26 @@ function renderCapsule(capsule) {
     }
   `;
 
+  // ---- Bottom Bar & Topbar Nav visibility updates ----
+  const barMsgCountEl = document.getElementById("barMsgCount");
+  if (barMsgCountEl) barMsgCountEl.textContent = `${msgCount} msgs`;
+
+  const barReadTimeEl = document.getElementById("barReadTime");
+  if (barReadTimeEl) barReadTimeEl.textContent = `${readingTime} min`;
+
+  const navTopics = document.getElementById("navTopics");
+  if (navTopics) navTopics.style.display = capsule.keyTopics?.length ? "inline-flex" : "none";
+
+  const navInsights = document.getElementById("navInsights");
+  if (navInsights) navInsights.style.display = capsule.insights?.length ? "inline-flex" : "none";
+
+  const navTimeline = document.getElementById("navTimeline");
+  if (navTimeline) navTimeline.style.display = capsule.conversation?.length ? "inline-flex" : "none";
+
   // ---- Copy Summary Button ----
   const copySummaryBtn = document.getElementById("copySummaryBtn");
   copySummaryBtn.style.display = "inline-flex";
-  copySummaryBtn.onclick = async () => {
+  const handleCopySummary = async () => {
     try {
       const summaryText = `Title: ${capsule.title}\n\nSummary:\n${capsule.summary || ""}\n\nKey Topics: ${(capsule.keyTopics || []).join(", ")}`;
       await navigator.clipboard.writeText(summaryText);
@@ -264,11 +280,15 @@ function renderCapsule(capsule) {
       setStatus("Failed to copy", true);
     }
   };
+  copySummaryBtn.onclick = handleCopySummary;
+
+  const bottomCopyBtn = document.getElementById("bottomCopyBtn");
+  if (bottomCopyBtn) bottomCopyBtn.onclick = handleCopySummary;
 
   // ---- Export Download Button ----
   const downloadBtn = document.getElementById("downloadBtn");
   downloadBtn.style.display = "inline-flex";
-  downloadBtn.onclick = () => {
+  const handleExportJSON = () => {
     try {
       const safeName = capsule.title
         ? capsule.title.replace(/[^a-z0-9]+/gi, "_").toLowerCase()
@@ -285,6 +305,10 @@ function renderCapsule(capsule) {
       setStatus(error.message, true);
     }
   };
+  downloadBtn.onclick = handleExportJSON;
+
+  const bottomExportBtn = document.getElementById("bottomExportBtn");
+  if (bottomExportBtn) bottomExportBtn.onclick = handleExportJSON;
 
   // ---- Key Topics ----
   if (Array.isArray(capsule.keyTopics) && capsule.keyTopics.length > 0) {
@@ -486,19 +510,66 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   });
 
-  // Back to top floating button
+  // Section navigation pills handling
+  const navItems = document.querySelectorAll(".nav-item[data-target]");
+  navItems.forEach((item) => {
+    item.addEventListener("click", () => {
+      const targetId = item.getAttribute("data-target");
+      const targetEl = document.getElementById(targetId);
+      if (targetEl) {
+        targetEl.scrollIntoView({ behavior: "smooth" });
+      }
+    });
+  });
+
+  // Scroll spy for topbar section pills
+  function updateScrollSpy() {
+    const sections = [
+      { id: "heroHeader" },
+      { id: "topicsSection" },
+      { id: "insightsSection" },
+      { id: "conversationSection" },
+    ];
+
+    const scrollPosition = window.scrollY + 140;
+    let activeTarget = "heroHeader";
+
+    sections.forEach(({ id }) => {
+      const el = document.getElementById(id);
+      if (el && el.style.display !== "none") {
+        const top = el.offsetTop;
+        if (scrollPosition >= top) {
+          activeTarget = id;
+        }
+      }
+    });
+
+    navItems.forEach((item) => {
+      if (item.getAttribute("data-target") === activeTarget) {
+        item.classList.add("active");
+      } else {
+        item.classList.remove("active");
+      }
+    });
+  }
+
+  window.addEventListener("scroll", updateScrollSpy);
+
+  // Back to top & Bottom bar scroll to top
   const backToTopBtn = document.getElementById("backToTop");
+  const bottomScrollTopBtn = document.getElementById("bottomScrollTop");
+
   window.addEventListener("scroll", () => {
     if (window.scrollY > 300) {
-      backToTopBtn.classList.add("visible");
+      backToTopBtn?.classList.add("visible");
     } else {
-      backToTopBtn.classList.remove("visible");
+      backToTopBtn?.classList.remove("visible");
     }
   });
 
-  backToTopBtn?.addEventListener("click", () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  });
+  const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
+  backToTopBtn?.addEventListener("click", scrollToTop);
+  bottomScrollTopBtn?.addEventListener("click", scrollToTop);
 
   // Load Capsule by Query Param
   const urlParams = new URLSearchParams(window.location.search);

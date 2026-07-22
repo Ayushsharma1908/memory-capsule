@@ -31,6 +31,28 @@
           </div>
         </a>
       </div>
+
+      <div class="topbar-center">
+        <nav class="topbar-nav" id="topbarNav">
+          <button class="nav-item active" data-target="heroHeader">
+            <i data-lucide="sparkles"></i>
+            <span>Overview</span>
+          </button>
+          <button class="nav-item" data-target="topicsSection" id="navTopics" style="display: none;">
+            <i data-lucide="tag"></i>
+            <span>Topics</span>
+          </button>
+          <button class="nav-item" data-target="insightsSection" id="navInsights" style="display: none;">
+            <i data-lucide="lightbulb"></i>
+            <span>Insights</span>
+          </button>
+          <button class="nav-item" data-target="conversationSection" id="navTimeline" style="display: none;">
+            <i data-lucide="message-square"></i>
+            <span>Timeline</span>
+          </button>
+        </nav>
+      </div>
+
       <div class="topbar-right">
         <button id="themeToggleBtn" class="btn-icon-topbar" title="Toggle theme" aria-label="Toggle theme">
           <i data-lucide="moon" id="themeIcon"></i>
@@ -129,7 +151,38 @@
     </footer>
   </main>
 
-  <!-- Back to Top Button -->
+  <!-- Floating Bottom Bar (Below Bar) -->
+  <aside class="bottom-bar" id="bottomBar">
+    <div class="bottom-bar-inner">
+      <div class="bottom-bar-left">
+        <div class="bottom-stat" id="barStatMessages" title="Total messages">
+          <i data-lucide="message-square"></i>
+          <span id="barMsgCount">0 msgs</span>
+        </div>
+        <span class="bottom-divider"></span>
+        <div class="bottom-stat" id="barStatReadTime" title="Reading time">
+          <i data-lucide="clock"></i>
+          <span id="barReadTime">1 min</span>
+        </div>
+      </div>
+      
+      <div class="bottom-bar-right">
+        <button id="bottomCopyBtn" class="bottom-btn" title="Copy summary text">
+          <i data-lucide="copy"></i>
+          <span class="btn-label">Copy</span>
+        </button>
+        <button id="bottomExportBtn" class="bottom-btn primary" title="Export JSON">
+          <i data-lucide="download"></i>
+          <span class="btn-label">Export</span>
+        </button>
+        <button id="bottomScrollTop" class="bottom-btn icon-only" title="Scroll to top" aria-label="Scroll to top">
+          <i data-lucide="arrow-up"></i>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Back to Top Floating Button -->
   <button id="backToTop" class="back-to-top" title="Scroll to top" aria-label="Scroll to top">
     <i data-lucide="arrow-up"></i>
   </button>
