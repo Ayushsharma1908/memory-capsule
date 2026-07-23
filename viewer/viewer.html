@@ -22,8 +22,7 @@
   <nav class="topbar">
     <div class="topbar-inner">
       <div class="topbar-left">
-        <a href="#" class="topbar-brand" id="backLink" title="Memory Capsule">
-          <i data-lucide="arrow-left" class="back-icon"></i>
+        <a href="#" class="topbar-brand" title="Memory Capsule">
           <img src="../assets/icon-128.png" alt="Memory Capsule Logo" class="topbar-icon" />
           <div class="brand-text">
             <span class="brand-title">Memory Capsule</span>
@@ -31,28 +30,26 @@
           </div>
         </a>
       </div>
-
       <div class="topbar-center">
-        <nav class="topbar-nav" id="topbarNav">
-          <button class="nav-item active" data-target="heroHeader">
+        <div class="topbar-nav">
+          <button class="nav-item active" id="navHero" data-target="heroHeader">
             <i data-lucide="sparkles"></i>
             <span>Overview</span>
           </button>
-          <button class="nav-item" data-target="topicsSection" id="navTopics" style="display: none;">
+          <button class="nav-item" id="navTopics" data-target="topicsSection" style="display: none;">
             <i data-lucide="tag"></i>
             <span>Topics</span>
           </button>
-          <button class="nav-item" data-target="insightsSection" id="navInsights" style="display: none;">
+          <button class="nav-item" id="navInsights" data-target="insightsSection" style="display: none;">
             <i data-lucide="lightbulb"></i>
             <span>Insights</span>
           </button>
-          <button class="nav-item" data-target="conversationSection" id="navTimeline" style="display: none;">
+          <button class="nav-item" id="navTimeline" data-target="conversationSection" style="display: none;">
             <i data-lucide="message-square"></i>
             <span>Timeline</span>
           </button>
-        </nav>
+        </div>
       </div>
-
       <div class="topbar-right">
         <button id="themeToggleBtn" class="btn-icon-topbar" title="Toggle theme" aria-label="Toggle theme">
           <i data-lucide="moon" id="themeIcon"></i>
@@ -115,12 +112,13 @@
           <span>Conversation Timeline</span>
           <span class="count-badge" id="messageCountBadge">0</span>
         </div>
-        
+
         <!-- Interactive Controls: Search & Role Filters -->
         <div class="chat-controls">
           <div class="search-box">
             <i data-lucide="search" class="search-icon"></i>
-            <input type="text" id="chatSearchInput" placeholder="Filter messages..." autocomplete="off" spellcheck="false" aria-label="Filter conversation messages" />
+            <input type="text" id="chatSearchInput" placeholder="Filter messages..." autocomplete="off"
+              spellcheck="false" aria-label="Filter conversation messages" />
             <button id="clearChatSearch" class="clear-search-btn" style="display: none;" title="Clear search">
               <i data-lucide="x"></i>
             </button>
@@ -151,41 +149,35 @@
     </footer>
   </main>
 
-  <!-- Floating Bottom Bar (Below Bar) -->
-  <aside class="bottom-bar" id="bottomBar">
+  <!-- Bottom Floating Action Bar -->
+  <div class="bottom-bar">
     <div class="bottom-bar-inner">
       <div class="bottom-bar-left">
-        <div class="bottom-stat" id="barStatMessages" title="Total messages">
+        <div class="bottom-stat" title="Total messages">
           <i data-lucide="message-square"></i>
           <span id="barMsgCount">0 msgs</span>
         </div>
-        <span class="bottom-divider"></span>
-        <div class="bottom-stat" id="barStatReadTime" title="Reading time">
+        <div class="bottom-divider"></div>
+        <div class="bottom-stat" title="Estimated reading time">
           <i data-lucide="clock"></i>
-          <span id="barReadTime">1 min</span>
+          <span id="barReadTime">0 min</span>
         </div>
       </div>
-      
       <div class="bottom-bar-right">
         <button id="bottomCopyBtn" class="bottom-btn" title="Copy summary text">
           <i data-lucide="copy"></i>
-          <span class="btn-label">Copy</span>
+          <span class="btn-label">Copy Text</span>
         </button>
         <button id="bottomExportBtn" class="bottom-btn primary" title="Export JSON">
           <i data-lucide="download"></i>
-          <span class="btn-label">Export</span>
+          <span class="btn-label">Export JSON</span>
         </button>
         <button id="bottomScrollTop" class="bottom-btn icon-only" title="Scroll to top" aria-label="Scroll to top">
           <i data-lucide="arrow-up"></i>
         </button>
       </div>
     </div>
-  </aside>
-
-  <!-- Back to Top Floating Button -->
-  <button id="backToTop" class="back-to-top" title="Scroll to top" aria-label="Scroll to top">
-    <i data-lucide="arrow-up"></i>
-  </button>
+  </div>
 
   <script src="viewer.js"></script>
 </body>
