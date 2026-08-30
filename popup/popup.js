@@ -421,14 +421,13 @@ async function generateCurrentAICapsule() {
   if (!capsule) throw new Error("Conversation data not found.");
 
   const messages = Array.isArray(capsule.messages) ? capsule.messages : [];
-  const conversationText = messages
-    .filter((m) => m && typeof m.content === "string" && m.content.trim().length > 0)
-    .map((m) => `${m.role}: ${m.content}`)
-    .join("\n\n");
+  const validMessages = messages.filter(
+    (m) => m && typeof m.content === "string" && m.content.trim().length > 0
+  );
 
-  if (!conversationText) throw new Error("No messages to send to AI.");
+  if (validMessages.length === 0) throw new Error("No messages to send to AI.");
 
-  const aiCapsule = await generateAICapsule(conversationText);
+  const aiCapsule = await generateAICapsule(validMessages);
   const generatedCapsule = {
     ...aiCapsule,
     updatedAt: new Date().toISOString(),
