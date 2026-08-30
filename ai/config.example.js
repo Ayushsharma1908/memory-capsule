@@ -1,2 +1,1 @@
-export const GEMINI_API_KEY =
-  "YOUR_GEMINI_API_KEY";
+export const API_BASE_URL = "http://localhost:5000";
