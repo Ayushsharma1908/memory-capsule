@@ -31,17 +31,17 @@
   --code-header: #242824;
   --code-text: #E8E6E3;
 
-  /* Shadows */
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.03);
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.02);
-  --shadow-md: 0 4px 8px -2px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.03);
-  --shadow-lg: 0 8px 20px -4px rgba(0, 0, 0, 0.06), 0 4px 8px -4px rgba(0, 0, 0, 0.03);
+  /* Shadows (Apple Style Ultra Subtle) */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.02);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.06);
 
   /* Radii */
-  --r-hero: 16px;
+  --r-hero: 14px;
   --r-card: 14px;
-  --r-btn: 10px;
-  --r-xs: 8px;
+  --r-btn: 8px;
+  --r-xs: 6px;
   --r-full: 9999px;
 
   /* Fonts */
@@ -80,9 +80,9 @@
   --code-header: #1E1E1E;
 
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.15);
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 4px 8px -2px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 8px 20px -4px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
 /* ── Reset ──────────────────────────────────────────────────── */
@@ -107,7 +107,7 @@ body {
   background: var(--bg);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  transition: background-color 300ms var(--ease), color 300ms var(--ease);
+  transition: background-color 200ms var(--ease), color 200ms var(--ease);
   min-height: 100vh;
 }
 
@@ -122,6 +122,26 @@ button {
   border: none;
   background: none;
   color: inherit;
+}
+
+button:focus-visible,
+input:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--beige);
+  outline-offset: 2px;
+}
+
+/* ── Scroll Progress Bar ────────────────────────────────────── */
+
+.progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2.5px;
+  background: var(--beige);
+  z-index: 1000;
+  width: 0%;
+  transition: width 100ms linear;
 }
 
 /* ── Scrollbars ─────────────────────────────────────────────── */
@@ -184,14 +204,14 @@ button {
   left: 0;
   right: 0;
   width: 100%;
-  height: 64px;
+  height: 56px;
   z-index: 100;
   background: rgba(248, 247, 244, 0.88);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--line-light);
   box-shadow: var(--shadow-xs);
-  transition: background-color 300ms var(--ease), border-color 300ms var(--ease);
+  transition: background-color 200ms var(--ease), border-color 200ms var(--ease);
 }
 
 [data-theme="dark"] .topbar {
@@ -201,9 +221,9 @@ button {
 
 .topbar-inner {
   width: 100%;
-  max-width: 1320px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 0 32px;
+  padding: 0 24px;
   height: 100%;
   display: flex;
   align-items: center;
@@ -273,28 +293,49 @@ button {
 }
 
 .topbar-nav {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   background: var(--card-muted);
-  padding: 4px 6px;
+  padding: 3px;
   border-radius: var(--r-full);
   border: 1px solid var(--line-light);
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.nav-indicator {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  width: 0px;
+  background: var(--card);
+  border-radius: var(--r-full);
+  box-shadow: var(--shadow-xs);
+  border: 1px solid var(--line-light);
+  transition: transform 200ms var(--ease), width 200ms var(--ease);
+  pointer-events: none;
+}
+
+[data-theme="dark"] .nav-indicator {
+  background: var(--beige-muted);
+  border-color: var(--beige-wash);
 }
 
 .nav-item {
+  position: relative;
+  z-index: 1;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 14px;
+  padding: 5px 14px;
   border-radius: var(--r-full);
   font-family: var(--font-display);
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
   color: var(--ink-2);
   background: transparent;
-  transition: all var(--speed) var(--ease);
+  transition: color 180ms var(--ease);
 }
 
 .nav-item svg {
@@ -305,19 +346,19 @@ button {
 
 .nav-item:hover {
   color: var(--ink);
-  background: var(--card-hover);
+  background: transparent;
 }
 
 .nav-item.active {
   color: var(--ink);
-  background: var(--card);
-  box-shadow: var(--shadow-xs);
+  background: transparent;
+  box-shadow: none;
   font-weight: 700;
 }
 
 [data-theme="dark"] .nav-item.active {
-  background: var(--beige-muted);
   color: var(--beige);
+  background: transparent;
 }
 
 .topbar-right {
@@ -353,11 +394,11 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  height: 36px;
+  height: 34px;
   padding: 0 14px;
   border-radius: var(--r-btn);
   font-family: var(--font-display);
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
   transition: all var(--speed) var(--ease);
 }
@@ -401,12 +442,12 @@ button {
 /* ── Page Layout ────────────────────────────────────────────── */
 
 .page {
-  max-width: 1040px;
+  max-width: 920px;
   margin: 0 auto;
-  padding: 92px 32px 110px;
+  padding: 84px 24px 110px;
   display: flex;
   flex-direction: column;
-  gap: 36px;
+  gap: 32px;
 }
 
 /* ── Hero Header ────────────────────────────────────────────── */
@@ -415,14 +456,14 @@ button {
   background: var(--card);
   border: 1px solid var(--card-border);
   border-radius: var(--r-hero);
-  padding: 28px 32px;
+  padding: 32px;
   box-shadow: var(--shadow-xs);
   position: relative;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  animation: fadeUp 350ms var(--ease) both;
+  gap: 18px;
+  animation: fadeUp 200ms var(--ease) both;
 }
 
 .hero::before {
@@ -431,7 +472,7 @@ button {
   top: 0;
   left: 0;
   right: 0;
-  height: 3px;
+  height: 2px;
   background: var(--beige);
 }
 
@@ -472,13 +513,14 @@ button {
 }
 
 .hero-summary {
+  max-width: 75%;
   font-family: var(--font-body);
-  font-size: 15px;
+  font-size: 14.5px;
   line-height: 1.65;
   color: var(--ink-2);
   background: var(--card-muted);
-  border-left: 3px solid var(--beige);
-  padding: 12px 16px;
+  border-left: 2px solid var(--beige);
+  padding: 12px 18px;
   border-radius: 0 var(--r-xs) var(--r-xs) 0;
 }
 
@@ -489,15 +531,16 @@ button {
 .hero-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 2px;
+  gap: 8px;
+  margin-top: 4px;
 }
 
 .meta-pill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 5px 12px;
+  height: 32px;
+  padding: 0 12px;
   background: var(--card-muted);
   border: 1px solid var(--line);
   border-radius: var(--r-full);
@@ -577,7 +620,8 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 14px;
+  height: 32px;
+  padding: 0 14px;
   background: var(--card-muted);
   border: 1px solid var(--line);
   border-radius: var(--r-full);
@@ -608,17 +652,19 @@ button {
 .insight-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .insight {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  padding: 14px 18px;
-  background: var(--card-muted);
+  gap: 14px;
+  padding: 16px 20px;
+  background: var(--card);
   border-radius: var(--r-card);
+  border: 1px solid var(--card-border);
   border-left: 3px solid var(--beige);
+  box-shadow: var(--shadow-xs);
   transition: all var(--speed) var(--ease);
 }
 
@@ -631,7 +677,7 @@ button {
   background: var(--beige-wash);
   color: var(--beige-hover);
   flex-shrink: 0;
-  margin-top: 2px;
+  margin-top: 1px;
 }
 
 .insight-icon svg {
@@ -643,14 +689,15 @@ button {
 .insight-text {
   font-family: var(--font-body);
   font-size: 14px;
-  line-height: 1.6;
+  line-height: 1.65;
   color: var(--ink);
   flex: 1;
 }
 
 .insight:hover {
-  background: var(--card-hover);
-  border-left-color: var(--beige-hover);
+  border-color: var(--line);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
 }
 
 /* ── Conversation Controls ──────────────────────────────────── */
@@ -679,7 +726,7 @@ button {
 }
 
 .search-box input {
-  height: 36px;
+  height: 34px;
   padding: 0 32px;
   border-radius: var(--r-btn);
   border: 1px solid var(--line);
@@ -720,13 +767,13 @@ button {
 .filter-pills {
   display: flex;
   background: var(--card-muted);
-  padding: 3px;
+  padding: 2px;
   border-radius: var(--r-btn);
   border: 1px solid var(--line);
 }
 
 .filter-pill {
-  padding: 5px 12px;
+  padding: 4px 10px;
   font-family: var(--font-display);
   font-size: 12px;
   font-weight: 600;
@@ -745,37 +792,76 @@ button {
   box-shadow: var(--shadow-xs);
 }
 
-/* ── Conversation Feed ──────────────────────────────────────── */
+/* ── Conversation Thread Timeline ───────────────────────────── */
 
 .conversation-feed {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
+  padding-left: 28px;
+}
+
+.timeline-line {
+  position: absolute;
+  top: 16px;
+  bottom: 16px;
+  left: 11px;
+  width: 2px;
+  background: var(--line-light);
+  border-radius: var(--r-full);
+}
+
+.timeline-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.timeline-node {
+  position: absolute;
+  left: -28px;
+  top: 18px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--card);
+  border: 2.5px solid var(--ink-3);
+  z-index: 2;
+  transition: transform var(--speed) var(--ease), border-color var(--speed) var(--ease);
+}
+
+.timeline-item.assistant .timeline-node {
+  border-color: var(--beige);
+  background: var(--beige-wash);
+}
+
+.timeline-item.user .timeline-node {
+  border-color: var(--ink-3);
+}
+
+.timeline-item:hover .timeline-node {
+  transform: scale(1.15);
 }
 
 .message-card {
-  background: var(--card-muted);
+  background: var(--card);
+  border: 1px solid var(--card-border);
   border-radius: var(--r-card);
-  padding: 18px 20px;
+  padding: 16px 20px;
   display: flex;
   flex-direction: column;
   gap: 10px;
   position: relative;
-  border-left: 3px solid transparent;
+  box-shadow: var(--shadow-xs);
   transition: all var(--speed) var(--ease);
-  animation: fadeUp 300ms var(--ease) both;
+  animation: fadeUp 200ms var(--ease) both;
 }
 
 .message-card:hover {
-  background: var(--card-hover);
-}
-
-.message-card.user {
-  border-left-color: var(--line);
-}
-
-.message-card.assistant {
-  border-left-color: var(--beige);
+  border-color: var(--line);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
 }
 
 .message-header {
@@ -1053,26 +1139,26 @@ button {
   right: 0;
   width: 100%;
   z-index: 95;
-  background: rgba(248, 247, 244, 0.88);
+  background: rgba(248, 247, 244, 0.92);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-top: 1px solid var(--line-light);
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.03);
-  transition: background-color 300ms var(--ease), border-color 300ms var(--ease);
+  box-shadow: 0 -1px 12px rgba(0, 0, 0, 0.03);
+  transition: background-color 200ms var(--ease), border-color 200ms var(--ease);
 }
 
 [data-theme="dark"] .bottom-bar {
-  background: rgba(18, 18, 18, 0.88);
+  background: rgba(18, 18, 18, 0.92);
   border-top-color: var(--line-light);
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 -1px 12px rgba(0, 0, 0, 0.2);
 }
 
 .bottom-bar-inner {
   width: 100%;
-  max-width: 1320px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 0 32px;
-  height: 60px;
+  padding: 0 24px;
+  height: 56px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1082,14 +1168,15 @@ button {
 .bottom-bar-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .bottom-stat {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 14px;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
   background: var(--card);
   border: 1px solid var(--line-light);
   border-radius: var(--r-full);
@@ -1097,12 +1184,11 @@ button {
   font-size: 12px;
   font-weight: 600;
   color: var(--ink-2);
-  box-shadow: var(--shadow-xs);
 }
 
 .bottom-stat svg {
-  width: 14px;
-  height: 14px;
+  width: 13px;
+  height: 13px;
   stroke-width: 1.75;
   color: var(--beige);
 }
@@ -1116,29 +1202,28 @@ button {
 .bottom-bar-right {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .bottom-btn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  height: 36px;
-  padding: 0 16px;
+  gap: 7px;
+  height: 34px;
+  padding: 0 14px;
   border-radius: var(--r-full);
   font-family: var(--font-display);
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
-  color: var(--ink);
+  color: var(--ink-2);
   background: var(--card);
   border: 1px solid var(--line);
-  box-shadow: var(--shadow-xs);
   transition: all var(--speed) var(--ease);
 }
 
 .bottom-btn svg {
-  width: 14px;
-  height: 14px;
+  width: 13px;
+  height: 13px;
   stroke-width: 1.75;
 }
 
@@ -1147,6 +1232,10 @@ button {
   color: var(--ink);
   border-color: var(--beige);
   transform: translateY(-1px);
+}
+
+.bottom-btn:active {
+  transform: translateY(0);
 }
 
 .bottom-btn.primary {
@@ -1163,15 +1252,71 @@ button {
 .bottom-btn.primary:hover {
   background: var(--beige-hover);
   color: #FFF;
-  box-shadow: var(--shadow-sm);
 }
 
 .bottom-btn.icon-only {
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   padding: 0;
   display: grid;
   place-items: center;
+}
+
+/* ── Empty States ───────────────────────────────────────────── */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 48px 20px;
+  text-align: center;
+  background: var(--card);
+  border: 1px dashed var(--line);
+  border-radius: var(--r-card);
+  color: var(--ink-3);
+}
+
+.empty-state svg {
+  width: 28px;
+  height: 28px;
+  stroke-width: 1.5;
+  color: var(--ink-4);
+}
+
+.empty-state p {
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--ink-3);
+  max-width: 220px;
+}
+
+.no-results {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 20px;
+  text-align: center;
+  background: var(--card);
+  border: 1px dashed var(--line);
+  border-radius: var(--r-card);
+  color: var(--ink-3);
+  gap: 10px;
+}
+
+.no-results svg {
+  width: 28px;
+  height: 28px;
+  stroke-width: 1.5;
+  color: var(--ink-4);
+}
+
+.no-results p {
+  font-size: 13.5px;
+  color: var(--ink-3);
 }
 
 /* ── Animations ─────────────────────────────────────────────── */
@@ -1179,7 +1324,7 @@ button {
 @keyframes fadeUp {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
@@ -1189,36 +1334,45 @@ button {
 
 /* ── Responsive ─────────────────────────────────────────────── */
 
+@media (max-width: 1024px) {
+  .page {
+    max-width: 760px;
+  }
+}
+
 @media (max-width: 900px) {
   .page {
-    padding: 84px 20px 100px;
-    gap: 28px;
+    padding: 78px 20px 96px;
+    gap: 24px;
   }
 
   .topbar-inner,
   .bottom-bar-inner {
     padding: 0 20px;
   }
+
+  .hero-summary {
+    max-width: 100%;
+  }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .page {
-    padding: 76px 16px 92px;
-    gap: 24px;
+    padding: 72px 16px 90px;
+    gap: 20px;
   }
 
   .topbar-inner,
   .bottom-bar-inner {
-    padding: 0 12px;
+    padding: 0 16px;
   }
 
-  .brand-subtitle,
-  .brand-title {
+  .brand-subtitle {
     display: none;
   }
 
   .topbar-nav {
-    padding: 2px 4px;
+    padding: 2px;
   }
 
   .nav-item span {
@@ -1226,16 +1380,16 @@ button {
   }
 
   .nav-item {
-    padding: 6px;
+    padding: 5px 8px;
   }
 
   .bottom-bar-inner {
     height: 52px;
-    gap: 8px;
   }
 
   .bottom-stat {
-    padding: 4px 8px;
+    height: 28px;
+    padding: 0 8px;
   }
 
   .bottom-stat span {
@@ -1247,13 +1401,13 @@ button {
   }
 
   .bottom-btn {
-    height: 32px;
-    padding: 0 8px;
+    height: 30px;
+    padding: 0 10px;
   }
 
   .bottom-btn.icon-only {
-    width: 32px;
-    height: 32px;
+    width: 30px;
+    height: 30px;
   }
 
   .hero {
@@ -1266,10 +1420,25 @@ button {
 
   .hero-summary {
     font-size: 14px;
+    max-width: 100%;
   }
 
   .message-card {
     padding: 14px 16px;
+  }
+
+  .conversation-feed {
+    padding-left: 22px;
+  }
+
+  .timeline-node {
+    left: -22px;
+    width: 12px;
+    height: 12px;
+  }
+
+  .timeline-line {
+    left: 9px;
   }
 
   .copy-msg-btn {

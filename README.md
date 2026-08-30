@@ -1,6 +1,6 @@
 # 🧠 AI Memory Capsule
 
-AI Memory Capsule is a Chrome Extension that automatically records ChatGPT conversations and transforms them into structured AI-generated memory capsules using Google's Gemini API.
+AI Memory Capsule is a Chrome Extension that automatically records ChatGPT conversations and transforms them into structured AI-generated memory capsules using a secure backend API with Google's Gemini 2.5 Flash API.
 
 Instead of saving raw chat logs, the extension extracts meaningful knowledge, key topics, insights, and learning outcomes from conversations.
 
@@ -14,9 +14,10 @@ Instead of saving raw chat logs, the extension extracts meaningful knowledge, ke
 - Stores messages locally using Chrome Storage
 - Tracks conversation metadata
 
-### 🤖 AI-Powered Capsule Generation
+### 🤖 Secure AI-Powered Capsule Generation
 
-- Uses Gemini 2.5 Flash
+- Gemini 2.5 Flash API integration hosted behind a secure Express backend
+- API key is never exposed to the Chrome Extension or client-side code
 - Generates:
   - Title
   - Summary
@@ -29,159 +30,71 @@ Instead of saving raw chat logs, the extension extracts meaningful knowledge, ke
 - Preserve conversation history and metadata
 - Download capsules for future retrieval
 
-### 🧠 Knowledge Extraction
-
-Rather than summarizing every message, the extension focuses on:
-
-- What the user learned
-- Important concepts discussed
-- Actionable insights
-- Learning outcomes
-
 ---
 
-## 📂 Project Structure
+## 📂 Architecture
 
 ```text
-memory-capsule/
-│
-├── manifest.json
-├── popup.html
-├── popup.js
-├── popup.css
-│
-├── content.js
-│
-├── aigenerator.js
-├── capsulegenerator.js
-├── config.js
-│
-└── assets/
+Chrome Extension ──(POST /api/ai/generate-capsule)──> Backend Server (Express/TypeScript) ──> Gemini 2.5 Flash API
 ```
+
+- **Chrome Extension**: Scrapes and manages conversation state locally, delegates capsule generation to the secure backend.
+- **Backend API (`memory-capsule-backend`)**: Validates requests, rate-limits endpoints, and handles Gemini API calls securely using server environment variables.
 
 ---
 
-## ⚙️ Installation
+## ⚙️ Installation & Setup
 
-### 1. Clone Repository
+### 1. Backend Setup (`memory-capsule-backend`)
+
+Navigate to the backend directory:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/memory-capsule.git
-cd memory-capsule
+cd memory-capsule-backend
 ```
 
-### 2. Open Chrome Extensions
+Install dependencies:
 
-Navigate to:
-
-```text
-chrome://extensions
+```bash
+npm install
 ```
 
-Enable **Developer Mode**.
+Create a `.env` file from `.env.example`:
 
-### 3. Load Extension
+```env
+PORT=5000
+GEMINI_API_KEY=YOUR_GEMINI_API_KEY
+```
 
-Click **Load Unpacked** and select the project folder.
+Start the backend in development mode:
+
+```bash
+npm run dev
+```
+
+### 2. Chrome Extension Setup
+
+1. Open Chrome and navigate to `chrome://extensions`
+2. Enable **Developer Mode** (top right toggle)
+3. Click **Load Unpacked** and select the `memory-capsule` directory
+4. Verify backend configuration in `ai/config.js`:
+   ```js
+   export const API_BASE_URL = "http://localhost:5000";
+   ```
 
 ---
 
-## 🔑 Gemini API Setup
+## 🔒 Security
 
-Create a file named:
-
-```js
-config.js
-```
-
-Add:
-
-```js
-export const GEMINI_API_KEY = "YOUR_GEMINI_API_KEY";
-```
-
-Get your API key from:
-
-https://aistudio.google.com
-
-> ⚠️ Never commit your API key to GitHub.
-
----
-
-## 🚀 Usage
-
-1. Open ChatGPT
-2. Start a conversation
-3. The extension automatically records messages
-4. Open the extension popup
-5. Select a conversation
-6. Click **Generate Capsule**
-7. The extension:
-   - Sends conversation to Gemini
-   - Generates AI Memory Capsule
-   - Saves capsule locally
-   - Downloads JSON file
-
----
-
-## 📄 Example Output
-
-```json
-{
-  "title": "Learning GitHub Basics",
-  "summary": "The user learned GitHub fundamentals, repository creation, and collaboration workflows.",
-
-  "keyTopics": [
-    "GitHub",
-    "Repositories",
-    "Git Commands",
-    "Version Control"
-  ],
-
-  "insights": [
-    "Repositories store project history.",
-    "Git tracks code changes using commits.",
-    "Collaboration happens through pull requests."
-  ]
-}
-```
-
----
-
-## 🔒 Privacy
-
-- All conversations are stored locally
-- No external database is used
-- Only selected conversations are sent to Gemini
-- User data is never shared with third parties
+- **Zero API Key Leakage**: Gemini API key exists exclusively on the server.
+- **Request Validation**: Incoming payloads are strictly validated using Zod.
+- **Rate Limiting**: Endpoint protection prevents API abuse.
+- **Local Storage**: All conversation data remains strictly in your local Chrome browser storage.
 
 ---
 
 ## 🛠 Tech Stack
 
-- JavaScript
-- Chrome Extension API
-- Chrome Storage API
-- Gemini 2.5 Flash API
-- HTML
-- CSS
-
----
-
-## 🎯 Future Roadmap
-
-- Capsule Search
-- Semantic Memory Retrieval
-- Export to PDF
-- Export to Markdown
-- Memory Graph Visualization
-- RAG-Based Recall System
-- Personalized Knowledge Base
-
----
-
-## 👨‍💻 Author
-
-**Ayush Kumar**
-
-Built to transform conversations into reusable knowledge.
+- **Extension**: JavaScript (ES6 Modules), Chrome Extension Manifest V3, HTML5, CSS3
+- **Backend**: Node.js, Express, TypeScript, Zod, CORS, Express-Rate-Limit
+- **AI Model**: Google Gemini 2.5 Flash API

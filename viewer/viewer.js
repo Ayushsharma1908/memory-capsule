@@ -268,26 +268,28 @@ function renderCapsule(capsule) {
   const navTimeline = document.getElementById("navTimeline");
   if (navTimeline) navTimeline.style.display = capsule.conversation?.length ? "inline-flex" : "none";
 
-  // ---- Copy Summary Button ----
+  setTimeout(updateNavIndicator, 50);
+
+  // ---- Copy Capsule Button ----
   const copySummaryBtn = document.getElementById("copySummaryBtn");
-  copySummaryBtn.style.display = "inline-flex";
+  if (copySummaryBtn) copySummaryBtn.style.display = "inline-flex";
   const handleCopySummary = async () => {
     try {
       const summaryText = `Title: ${capsule.title}\n\nSummary:\n${capsule.summary || ""}\n\nKey Topics: ${(capsule.keyTopics || []).join(", ")}`;
       await navigator.clipboard.writeText(summaryText);
-      setStatus("Copied summary text!");
+      setStatus("Copied Capsule summary!");
     } catch (e) {
-      setStatus("Failed to copy", true);
+      setStatus("Failed to copy capsule", true);
     }
   };
-  copySummaryBtn.onclick = handleCopySummary;
+  if (copySummaryBtn) copySummaryBtn.onclick = handleCopySummary;
 
   const bottomCopyBtn = document.getElementById("bottomCopyBtn");
   if (bottomCopyBtn) bottomCopyBtn.onclick = handleCopySummary;
 
   // ---- Export Download Button ----
   const downloadBtn = document.getElementById("downloadBtn");
-  downloadBtn.style.display = "inline-flex";
+  if (downloadBtn) downloadBtn.style.display = "inline-flex";
   const handleExportJSON = () => {
     try {
       const safeName = capsule.title
@@ -300,12 +302,12 @@ function renderCapsule(capsule) {
       a.download = `capsule-${safeName}.json`;
       a.click();
       URL.revokeObjectURL(url);
-      setStatus("Exported JSON file");
+      setStatus("Exported JSON file successfully");
     } catch (error) {
       setStatus(error.message, true);
     }
   };
-  downloadBtn.onclick = handleExportJSON;
+  if (downloadBtn) downloadBtn.onclick = handleExportJSON;
 
   const bottomExportBtn = document.getElementById("bottomExportBtn");
   if (bottomExportBtn) bottomExportBtn.onclick = handleExportJSON;
@@ -398,12 +400,13 @@ function filterAndRenderFeed() {
 
   noResultsEl.style.display = "none";
 
-  filtered.forEach((msg, index) => {
-    const card = document.createElement("div");
-    const isUser = msg.role === "user";
-    card.className = `message-card ${isUser ? "user" : "assistant"}`;
-    card.style.animationDelay = `${index * 30}ms`;
+  // Timeline spine line
+  const spineLine = document.createElement("div");
+  spineLine.className = "timeline-line";
+  feedContainer.appendChild(spineLine);
 
+  filtered.forEach((msg, index) => {
+    const isUser = msg.role === "user";
     const authorName = isUser ? "You" : "ChatGPT";
     const avatarContent = isUser
       ? `<i data-lucide="user"></i>`
@@ -411,6 +414,19 @@ function filterAndRenderFeed() {
 
     const formattedBody = renderMarkdown(msg.content);
 
+    // Timeline item wrapper
+    const item = document.createElement("div");
+    item.className = `timeline-item ${isUser ? "user" : "assistant"}`;
+    item.style.animationDelay = `${index * 25}ms`;
+
+    // Node marker
+    const node = document.createElement("div");
+    node.className = "timeline-node";
+    item.appendChild(node);
+
+    // Message card
+    const card = document.createElement("div");
+    card.className = `message-card ${isUser ? "user" : "assistant"}`;
     card.innerHTML = `
       <div class="message-header">
         <div class="message-author">
@@ -419,14 +435,13 @@ function filterAndRenderFeed() {
           </div>
           <span class="author-name">${authorName}</span>
         </div>
-        <button class="copy-msg-btn" title="Copy message text">
+        <button class="copy-msg-btn" title="Copy message text" aria-label="Copy message">
           <i data-lucide="copy"></i> Copy
         </button>
       </div>
       <div class="message-body">${formattedBody}</div>
     `;
 
-    // Copy message click handler
     card.querySelector(".copy-msg-btn").onclick = async () => {
       try {
         await navigator.clipboard.writeText(msg.content);
@@ -436,7 +451,8 @@ function filterAndRenderFeed() {
       }
     };
 
-    feedContainer.appendChild(card);
+    item.appendChild(card);
+    feedContainer.appendChild(item);
   });
 
   updateIcons();
@@ -467,6 +483,28 @@ document.addEventListener("click", async (e) => {
     setStatus("Failed to copy code", true);
   }
 });
+
+// ========================================================
+// NAV INDICATOR (Arc-style sliding pill)
+// ========================================================
+
+function updateNavIndicator() {
+  const nav = document.getElementById("topbarNav");
+  const indicator = document.getElementById("navIndicator");
+  if (!nav || !indicator) return;
+
+  const activeItem = nav.querySelector(".nav-item.active");
+  if (!activeItem) {
+    indicator.style.width = "0px";
+    return;
+  }
+
+  const navRect = nav.getBoundingClientRect();
+  const itemRect = activeItem.getBoundingClientRect();
+
+  indicator.style.width = `${itemRect.width}px`;
+  indicator.style.transform = `translateX(${itemRect.left - navRect.left - 3}px)`;
+}
 
 // ========================================================
 // EVENT LISTENERS & INITIALIZATION
@@ -510,7 +548,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   });
 
-  // Section navigation pills handling
+  // Section navigation pills handling with indicator update
   const navItems = document.querySelectorAll(".nav-item[data-target]");
   navItems.forEach((item) => {
     item.addEventListener("click", () => {
@@ -522,6 +560,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   });
 
+  // Progress bar updater
+  const progressBar = document.getElementById("progressBar");
+  function updateProgressBar() {
+    if (!progressBar) return;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const scrolled = docHeight > 0 ? (window.scrollY / docHeight) * 100 : 0;
+    progressBar.style.width = `${Math.min(scrolled, 100)}%`;
+  }
+
   // Scroll spy for topbar section pills
   function updateScrollSpy() {
     const sections = [
@@ -531,7 +578,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       { id: "conversationSection" },
     ];
 
-    const scrollPosition = window.scrollY + 140;
+    const scrollPosition = window.scrollY + 100;
     let activeTarget = "heroHeader";
 
     sections.forEach(({ id }) => {
@@ -544,32 +591,42 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     });
 
+    let changed = false;
     navItems.forEach((item) => {
-      if (item.getAttribute("data-target") === activeTarget) {
+      const isActive = item.getAttribute("data-target") === activeTarget;
+      if (isActive && !item.classList.contains("active")) {
         item.classList.add("active");
-      } else {
+        changed = true;
+      } else if (!isActive && item.classList.contains("active")) {
         item.classList.remove("active");
+        changed = true;
       }
     });
+
+    if (changed) updateNavIndicator();
   }
 
-  window.addEventListener("scroll", updateScrollSpy);
-
-  // Back to top & Bottom bar scroll to top
-  const backToTopBtn = document.getElementById("backToTop");
-  const bottomScrollTopBtn = document.getElementById("bottomScrollTop");
-
+  // Merge all scroll events into single rAF-throttled handler
+  let ticking = false;
   window.addEventListener("scroll", () => {
-    if (window.scrollY > 300) {
-      backToTopBtn?.classList.add("visible");
-    } else {
-      backToTopBtn?.classList.remove("visible");
+    if (!ticking) {
+      requestAnimationFrame(() => {
+        updateProgressBar();
+        updateScrollSpy();
+        ticking = false;
+      });
+      ticking = true;
     }
-  });
+  }, { passive: true });
 
+  // Bottom bar scroll to top
+  const bottomScrollTopBtn = document.getElementById("bottomScrollTop");
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
-  backToTopBtn?.addEventListener("click", scrollToTop);
   bottomScrollTopBtn?.addEventListener("click", scrollToTop);
+
+  // Initial indicator placement after fonts load
+  setTimeout(updateNavIndicator, 100);
+  window.addEventListener("resize", updateNavIndicator, { passive: true });
 
   // Load Capsule by Query Param
   const urlParams = new URLSearchParams(window.location.search);
