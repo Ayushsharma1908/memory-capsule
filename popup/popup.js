@@ -54,8 +54,19 @@ function updateIcons() {
 
 function storageGet(keys) {
   return new Promise((resolve, reject) => {
+    if (typeof chrome === "undefined" || !chrome.storage?.local) {
+      const res = {};
+      (Array.isArray(keys) ? keys : [keys]).forEach((k) => {
+        try {
+          const val = localStorage.getItem(k);
+          if (val !== null) res[k] = JSON.parse(val);
+        } catch (_) {}
+      });
+      resolve(res);
+      return;
+    }
     chrome.storage.local.get(keys, (result) => {
-      if (chrome.runtime.lastError) {
+      if (chrome.runtime?.lastError) {
         reject(new Error(chrome.runtime.lastError.message));
       } else {
         resolve(result);
@@ -66,8 +77,15 @@ function storageGet(keys) {
 
 function storageSet(data) {
   return new Promise((resolve, reject) => {
+    if (typeof chrome === "undefined" || !chrome.storage?.local) {
+      Object.entries(data).forEach(([k, v]) => {
+        localStorage.setItem(k, JSON.stringify(v));
+      });
+      resolve();
+      return;
+    }
     chrome.storage.local.set(data, () => {
-      if (chrome.runtime.lastError) {
+      if (chrome.runtime?.lastError) {
         reject(new Error(chrome.runtime.lastError.message));
       } else {
         resolve();
@@ -217,10 +235,16 @@ function renderCard(id, capsule, type, index) {
   `;
 
   const url = type === "ai"
-    ? chrome.runtime.getURL(`viewer/viewer.html?id=${id}`)
+    ? (typeof chrome !== "undefined" && chrome.runtime?.getURL ? chrome.runtime.getURL(`viewer/viewer.html?id=${id}`) : `../viewer/viewer.html?id=${id}`)
     : `https://chatgpt.com/c/${id}`;
 
-  const openUrl = () => chrome.tabs.create({ url });
+  const openUrl = () => {
+    if (typeof chrome !== "undefined" && chrome.tabs?.create) {
+      chrome.tabs.create({ url });
+    } else {
+      window.open(url, "_blank");
+    }
+  };
 
   item.addEventListener("click", openUrl);
   item.addEventListener("keydown", (e) => {
@@ -512,22 +536,24 @@ darkModeToggle?.addEventListener("change", (e) => {
   setTheme(newTheme).catch((err) => setStatus(err.message, true));
 });
 
-chrome.storage.onChanged.addListener((changes, areaName) => {
-  if (areaName !== "local") return;
+if (typeof chrome !== "undefined" && chrome.storage?.onChanged) {
+  chrome.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName !== "local") return;
 
-  if (changes.capsules || changes.currentConversationId) {
-    renderCurrentChat().catch((e) => setStatus(e.message, true));
-    renderCapsules().catch((e) => setStatus(e.message, true));
-  }
+    if (changes.capsules || changes.currentConversationId) {
+      renderCurrentChat().catch((e) => setStatus(e.message, true));
+      renderCapsules().catch((e) => setStatus(e.message, true));
+    }
 
-  if (changes.aiCapsules) {
-    renderGeneratedCapsules().catch((e) => setStatus(e.message, true));
-  }
+    if (changes.aiCapsules) {
+      renderGeneratedCapsules().catch((e) => setStatus(e.message, true));
+    }
 
-  if (changes.theme) {
-    applyTheme(changes.theme.newValue);
-  }
-});
+    if (changes.theme) {
+      applyTheme(changes.theme.newValue);
+    }
+  });
+}
 
 // ========================================================
 // INITIALIZATION

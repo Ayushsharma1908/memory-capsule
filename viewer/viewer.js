@@ -133,8 +133,19 @@ function setStatus(message, isError = false) {
 
 function storageGet(keys) {
   return new Promise((resolve, reject) => {
+    if (typeof chrome === "undefined" || !chrome.storage?.local) {
+      const res = {};
+      (Array.isArray(keys) ? keys : [keys]).forEach((k) => {
+        try {
+          const val = localStorage.getItem(k);
+          if (val !== null) res[k] = JSON.parse(val);
+        } catch (_) {}
+      });
+      resolve(res);
+      return;
+    }
     chrome.storage.local.get(keys, (result) => {
-      if (chrome.runtime.lastError) {
+      if (chrome.runtime?.lastError) {
         reject(new Error(chrome.runtime.lastError.message));
       } else {
         resolve(result);
@@ -145,8 +156,15 @@ function storageGet(keys) {
 
 function storageSet(data) {
   return new Promise((resolve, reject) => {
+    if (typeof chrome === "undefined" || !chrome.storage?.local) {
+      Object.entries(data).forEach(([k, v]) => {
+        localStorage.setItem(k, JSON.stringify(v));
+      });
+      resolve();
+      return;
+    }
     chrome.storage.local.set(data, () => {
-      if (chrome.runtime.lastError) {
+      if (chrome.runtime?.lastError) {
         reject(new Error(chrome.runtime.lastError.message));
       } else {
         resolve();
@@ -655,8 +673,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 
-chrome.storage.onChanged.addListener((changes, areaName) => {
-  if (areaName === "local" && changes.theme) {
-    applyTheme(changes.theme.newValue);
-  }
-});
+if (typeof chrome !== "undefined" && chrome.storage?.onChanged) {
+  chrome.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName === "local" && changes.theme) {
+      applyTheme(changes.theme.newValue);
+    }
+  });
+}
