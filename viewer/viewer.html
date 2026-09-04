@@ -16,6 +16,7 @@
 </head>
 
 <body>
+  <div class="progress-bar" id="progressBar"></div>
   <div id="toast" class="toast" aria-live="polite"></div>
 
   <!-- Top Navigation Bar -->
@@ -31,7 +32,8 @@
         </a>
       </div>
       <div class="topbar-center">
-        <div class="topbar-nav">
+        <div class="topbar-nav" id="topbarNav">
+          <div class="nav-indicator" id="navIndicator"></div>
           <button class="nav-item active" id="navHero" data-target="heroHeader">
             <i data-lucide="sparkles"></i>
             <span>Overview</span>

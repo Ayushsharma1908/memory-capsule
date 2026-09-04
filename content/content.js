@@ -17,6 +17,10 @@
 
   function storageGet(keys) {
     return new Promise((resolve, reject) => {
+      if (!chrome.runtime?.id) {
+        reject(new Error("Extension context invalidated"));
+        return;
+      }
       chrome.storage.local.get(keys, (result) => {
         const error = chrome.runtime.lastError;
         if (error) {
@@ -30,6 +34,10 @@
 
   function storageSet(data) {
     return new Promise((resolve, reject) => {
+      if (!chrome.runtime?.id) {
+        reject(new Error("Extension context invalidated"));
+        return;
+      }
       chrome.storage.local.set(data, () => {
         const error = chrome.runtime.lastError;
         if (error) {
