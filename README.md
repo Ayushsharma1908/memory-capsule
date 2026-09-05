@@ -212,15 +212,15 @@ memory-capsule/
 
 ### 🌐 Landing Page
 
-![Memory Capsule Landing Page](assets/screenshots/landing-page.png)
+![Memory Capsule Landing Page](screenshots/landing-page.png)
 
 ### 🧩 Extension Popup
 
-![Extension Popup](assets/screenshots/extension-popup.png)
+![Extension Popup](screenshots/extension-popup.png)
 
 ### 🤖 AI Memory Capsule
 
-![AI Memory Capsule](assets/screenshots/ai-capsule.png)
+![AI Memory Capsule](screenshots/ai-capsule.png)
 
 ## 🔐 Security
 
