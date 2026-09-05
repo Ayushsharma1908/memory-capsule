@@ -226,6 +226,13 @@ Gemini AI
 
 This architecture prevents sensitive AI credentials from being directly exposed in the client-side extension code.
 
+## 📥 Download
+
+Download and install the latest version of AI Memory Capsule:
+
+[⬇️ Download Latest Release](https://github.com/Ayushsharma1908/memory-capsule/releases/latest)
+
+
 ## 🌐 Related Projects
 
 - **Backend API:** The backend handles AI capsule generation and securely communicates with Gemini.  
@@ -244,13 +251,6 @@ This architecture prevents sensitive AI credentials from being directly exposed 
 - [x] Deploy backend API
 - [x] Deploy official website
 - [x] Create downloadable extension release
-- [ ] Chrome Web Store release
-- [ ] Advanced conversation search
-- [ ] Conversation categorization
-- [ ] Cloud synchronization
-- [ ] User accounts
-- [ ] Cross-device access
-- [ ] Support for additional AI platforms
 
 ## 🤝 Contributing
 
